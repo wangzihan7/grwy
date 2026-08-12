@@ -1,0 +1,231 @@
+/* ============================================================
+   contact.css — 05 · 联系方式 Contact
+   规格 40 小人在挥手 / 41 点一下就复制走了 / 42 手机号点开才显示
+        43 简历按钮在呼吸 / 44 页脚小人打哈欠
+        46 滚动条也是手绘的
+   ============================================================ */
+
+.contact {
+  position: relative;
+  z-index: 1;
+  /* 上一段（用户标签）是 --d-bg，这里必须换一个，
+     否则最后两屏连成一片看不出边界 */
+  background: var(--d-bg-alt);
+  padding: calc(var(--nav-h) + 6px) 24px 0;
+  overflow: hidden;
+}
+.contact__inner { max-width: 1300px; margin: 0 auto; }
+
+.contact__center { display: flex; flex-direction: column; align-items: center; }
+
+/* —— 40 · 小人在挥手 —— */
+.ct-mascot { display: block; }
+/* 手臂绕肩部摆，不是整只手平移 */
+.ct-mascot__arm {
+  transform-box: view-box;
+  transform-origin: 60px 78px;
+  animation: ctWave 1.2s ease-in-out infinite alternate;
+}
+@keyframes ctWave {
+  from { transform: rotate(-8deg); }
+  to   { transform: rotate(12deg); }
+}
+/* 三条弧线依次放大淡出，像真的在打招呼 */
+.ct-mascot__wave path {
+  transform-box: fill-box;
+  transform-origin: 0 100%;
+  animation: ctHi 1.2s ease-out infinite;
+}
+.ct-mascot__wave path:nth-child(2) { animation-delay: .15s; }
+.ct-mascot__wave path:nth-child(3) { animation-delay: .3s; }
+@keyframes ctHi {
+   0%  { transform: scale(.6); opacity: 0; }
+  40%  { opacity: .9; }
+ 100%  { transform: scale(1); opacity: 0; }
+}
+
+/* —— 标题 —— */
+.ct-title {
+  display: flex;
+  align-items: baseline;
+  font-family: var(--font-body);
+  font-size: 64px; font-weight: 700; line-height: 1.3;
+  color: var(--pencil);
+  margin: 26px 0 0;
+}
+.ct-title span { display: inline-block; }
+.js-anim .contact:not(.is-in) .ct-title span { opacity: 0; transform: translateY(12px); }
+.js-anim .contact.is-in .ct-title span {
+  opacity: 1; transform: none;
+  transition: opacity .38s ease, transform .45s var(--ease-back);
+  transition-delay: calc(var(--i, 0) * .05s);
+}
+
+.ct-rule { display: block; width: 300px; height: 12px; margin-top: -2px; overflow: visible; }
+.ct-rule path { fill: none; stroke: var(--orange); stroke-width: 2.8; stroke-linecap: round; }
+.js-anim .contact:not(.is-in) .ct-rule path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js-anim .contact.is-in .ct-rule path {
+  stroke-dasharray: 1; stroke-dashoffset: 0;
+  transition: stroke-dashoffset .62s cubic-bezier(.35, 0, .25, 1) .5s;
+}
+
+.ct-cn {
+  font-family: var(--font-body);
+  font-size: 23px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil); opacity: .65;
+  margin: 8px 0 0;
+}
+.ct-lead {
+  font-family: var(--font-body);
+  font-size: 16.5px; line-height: 1.9;
+  color: var(--pencil); opacity: .8;
+  margin: 22px 0 0;
+  text-align: center;
+}
+
+/* —— 三张联系卡 —— */
+.ct-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 284px);
+  justify-content: center;
+  gap: 24px;
+  margin-top: 44px;
+}
+.ct-card {
+  display: flex; flex-direction: column; gap: 11px;
+  padding: 22px 24px;
+  background: var(--d-bg-alt);
+  border: 2px solid var(--pencil);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color .4s ease, transform .25s ease-out, box-shadow .25s ease-out;
+}
+.ct-card:nth-child(1) { border-radius: 26px 8px 24px 8px; }
+.ct-card:nth-child(2) { border-radius: 8px 26px 8px 24px; }
+.ct-card:nth-child(3) { border-radius: 24px 8px 26px 8px; }
+.ct-card:hover { transform: translateY(-3px); box-shadow: 5px 7px 0 rgba(90, 90, 90, .18); }
+.ct-card--static { cursor: default; }
+.ct-card--static:hover { transform: none; box-shadow: none; }
+
+.ct-card__h { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ct-card__k {
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.68;
+  letter-spacing: .08em;
+  color: var(--pencil); opacity: .55;
+}
+.ct-card__act {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--act-c);
+}
+.ct-card__v {
+  font-family: var(--font-body);
+  font-size: 19px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+}
+/* 41 · 复制成功：描边闪一下青色，不弹 toast */
+.ct-card.is-copied { border-color: var(--teal); }
+
+/* 42 · 手机号中间四位像翻页牌一样逐位翻出 */
+.ct-digit { display: inline-block; transform-origin: 50% 50%; }
+.ct-digit.is-flip { animation: ctFlip .34s ease-out both; }
+@keyframes ctFlip {
+  from { transform: rotateX(90deg); opacity: .2; }
+  to   { transform: rotateX(0);     opacity: 1; }
+}
+
+.js-anim .contact:not(.is-in) .ct-card { opacity: 0; transform: translateY(16px); }
+.js-anim .contact.is-in .ct-card {
+  opacity: 1; transform: none;
+  transition: opacity .45s ease, transform .45s var(--ease-out-soft),
+              border-color .4s ease, box-shadow .25s ease-out;
+  transition-delay: calc(.75s + var(--i, 0) * .1s);
+}
+
+/* —— 43 · 简历按钮在呼吸 —— */
+.ct-resume { display: flex; justify-content: center; margin-top: 38px; }
+.ct-btn {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 17px 34px;
+  background: var(--orange);
+  border: 2.2px solid var(--pencil);
+  border-radius: 32px 10px 28px 10px;
+  font-family: var(--font-body);
+  font-size: 21px; font-weight: 700; line-height: 1.45;
+  color: #fff;
+  text-decoration: none;
+  /* 全页唯一的实心按钮，投影做极缓慢的明暗呼吸 */
+  animation: ctBreathe 2.5s ease-in-out infinite;
+  transition: transform .25s ease-out;
+}
+@keyframes ctBreathe {
+   0%, 100% { box-shadow: 5px 6px 0 var(--pencil); }
+  50%       { box-shadow: 7px 9px 0 var(--pencil); }
+}
+.ct-btn:hover { transform: rotate(-2deg) scale(1.04); }
+.ct-btn.is-wiggle { animation: ctWiggle .4s ease-in-out; }
+@keyframes ctWiggle {
+   0%, 100% { transform: rotate(-2deg) scale(1.04); }
+  30%       { transform: rotate(1deg)  scale(1.05); }
+  65%       { transform: rotate(-3deg) scale(1.03); }
+}
+/* 简历暂未开放下载：按钮还在，但不装成可点的样子 ——
+   降成描边样式、去掉呼吸与 hover，一眼能看出是“还没好”而不是“坏了” */
+.ct-btn--soon {
+  background: transparent;
+  color: var(--pencil);
+  border-style: dashed;
+  border-color: rgba(90, 90, 90, .55);
+  cursor: default;
+  animation: none;
+  box-shadow: 3px 4px 0 rgba(90, 90, 90, .22);
+  opacity: .78;
+}
+.ct-btn--soon:hover { transform: none; }
+.ct-btn--soon svg { stroke: var(--pencil); }
+
+.ct-btn svg { width: 19px; height: 19px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* —— 页脚 —— */
+.ct-footer-rule { display: block; width: 100%; height: 4px; margin-top: 58px; opacity: .3; }
+.ct-footer-rule path { fill: none; stroke: var(--pencil); stroke-width: 1.6; }
+
+.ct-footer {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 22px 0 30px;
+}
+.ct-footer__line {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil); opacity: .55;
+}
+.ct-footer__line--small { font-size: 15px; opacity: .45; }
+
+/* —— 44 · 页脚小人打哈欠 —— */
+.ct-mini { cursor: default; }
+.ct-mini__eye { transform-box: fill-box; transform-origin: center; transition: transform .3s ease; }
+.ct-mini__body { transform-box: view-box; transform-origin: 22px 36px; transition: transform .5s ease; }
+.ct-mini__mouth { transition: d .3s ease; }
+/* 鼠标经过时打个哈欠：眼睛眯成线、身体伸展一下 */
+.ct-mini:hover .ct-mini__eye { transform: scaleY(.15); }
+.ct-mini:hover .ct-mini__body { transform: scaleY(1.06); }
+
+/* —— 涂鸦 —— */
+.ct-doodles { position: absolute; inset: 0; pointer-events: none; }
+.ct-doodles .doodle { position: absolute; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ct-mascot__arm, .ct-mascot__wave path, .ct-btn { animation: none; }
+  .ct-btn { box-shadow: 5px 6px 0 var(--pencil); }
+  .ct-btn:hover { transform: none; }
+  .ct-digit.is-flip { animation: none; }
+}
+
+@media (max-width: 900px) {
+  .ct-title { font-size: 46px; }
+  .ct-rule { width: 220px; }
+  .ct-cards { grid-template-columns: minmax(0, 320px); }
+  .ct-lead { font-size: 15.5px; }
+}

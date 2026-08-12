@@ -1,0 +1,262 @@
+/* ============================================================
+   about.css — 02 · 关于我 About
+   规格 14 两组卡片先后落位 / 18 头像框在轻轻变形 / 19 涂鸦在飘，标签会亮
+   ============================================================ */
+
+.about {
+  position: relative;
+  z-index: 1;
+  background: var(--d-bg-alt);
+  padding: calc(var(--nav-h) + 15px) 24px 90px;
+  overflow: hidden;
+}
+
+.about__inner {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* 板块标题本身由 section-title.css 统一处理，这里只管它在本板块的间距 */
+.about__header { margin-bottom: 34px; }
+
+/* —— 自我介绍 —— */
+.about__intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 60px;
+  max-width: 1100px;
+  margin: 0 auto 38px;
+}
+
+.about__avatar-wrap { position: relative; flex: 0 0 auto; padding: 8px 11px 15px 4px; }
+
+/* 18 · 头像框在轻轻变形：圆角在四组不对称数值间 8s 循环。
+   和卡片边框的噪声抖动是两种手法，周期也错开，同屏不打架。 */
+.about__avatar {
+  position: relative;
+  width: 164px;
+  height: 164px;
+  background: var(--d-bg);
+  border: 1.75px solid var(--pencil);
+  border-radius: 54px 8px 49px 8px;
+  animation: frameWobble 8s ease-in-out infinite;
+  overflow: hidden;
+}
+@keyframes frameWobble {
+   0%, 100% { border-radius: 54px  8px 49px  8px; }
+  25%       { border-radius: 44px 14px 58px  6px; }
+  50%       { border-radius: 60px  6px 42px 13px; }
+  75%       { border-radius: 48px 11px 54px  9px; }
+}
+.about__avatar svg { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); }
+
+.about__avatar-deco { position: absolute; }
+.about__avatar-deco--star  { right: 0; top: 0; }
+.about__avatar-deco--heart { left: 0; bottom: 0; }
+
+.about__text { flex: 1 1 auto; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.about__lead {
+  font-family: var(--font-body);
+  font-size: 20px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil); margin: 0;
+}
+.about__name {
+  font-family: var(--font-body);
+  font-size: 28px; font-weight: 700; line-height: 1.6;
+  color: var(--pencil); margin: 0;
+}
+.about__p {
+  font-family: var(--font-body);
+  font-size: 15.5px; line-height: 1.9;
+  color: var(--pencil); opacity: .85; margin: 0;
+}
+
+/* —— 分组标签 —— */
+.about__labs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 140px;
+  margin-bottom: 22px;
+}
+.about__lab { display: flex; align-items: center; gap: 11px; }
+.about__lab-en {
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: var(--orange);
+}
+.about__lab-rule { width: 38px; height: 6px; opacity: .35; overflow: visible; }
+.about__lab-rule path { fill: none; stroke: var(--pencil); stroke-width: 1.8; stroke-linecap: round; }
+.about__lab-cn {
+  font-family: var(--font-body);
+  font-size: 14.5px; line-height: 1.68;
+  color: var(--pencil); opacity: .6;
+}
+
+/* —— 四张卡 —— */
+.about__cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px 140px;
+}
+
+.eb-card {
+  position: relative;
+  display: block;
+  padding: 13px 22px;
+  border-radius: var(--card-r);
+}
+
+/* 手绘纸底：边缘是抖的，不是直线。
+   它是 absolute，而 absolute 元素在层叠顺序里排在 static 内容之后，
+   所以卡片正文要显式提为 positioned 才不会被纸底盖住。
+   fill 写在 svg 上而不是 `... path` —— <use> 引用的内容在 shadow DOM 里，
+   后代选择器选不中，只有可继承属性能传进去。 */
+.eb-card__paper {
+  position: absolute;
+  left: -7px; top: -7px; right: -7px; bottom: -7px;
+  pointer-events: none;
+  fill: var(--d-bg);
+}
+
+.eb-card__head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 34px;
+}
+.eb-card__head-l { display: flex; align-items: center; gap: 10px; }
+
+.eb-card__ico {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border: 1.8px solid var(--eb-key);
+  border-radius: 13px 5px 12px 5px;
+}
+.eb-card__ico svg { width: 17px; height: 17px; stroke: var(--eb-key); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.eb-card__en {
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: var(--eb-key);
+}
+
+.eb-card__badge {
+  padding: 4px 11px;
+  border-radius: 12px 4px 11px 4px;
+  background: var(--eb-key);
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: #fff;
+  white-space: nowrap;
+}
+.eb-card__time {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil); opacity: .55;
+  white-space: nowrap;
+}
+
+.eb-card__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 10px;
+  height: 28px;   /* 字号上调后 24px 装不下，卡片跟着长 4px */
+}
+.eb-card__main {
+  font-family: var(--font-body);
+  font-size: 19.5px; font-weight: 700; line-height: 1.4;
+  color: var(--pencil);
+  white-space: nowrap;
+}
+.eb-card__sec {
+  font-family: var(--font-body);
+  font-size: 14.5px; line-height: 1.6;
+  color: var(--pencil); opacity: .72;
+  white-space: nowrap;
+}
+
+/* —— 分隔线 —— */
+.about__divider { display: block; width: 100%; max-width: 1100px; height: 10px; margin: 46px auto 26px; }
+.about__divider path { fill: none; stroke: var(--pencil); stroke-width: 1.6; opacity: .26; }
+
+/* —— 工具箱与荣誉 —— */
+.about__skills {
+  display: flex;
+  gap: 50px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.about__skills-col { display: flex; flex-direction: column; gap: 10px; }
+.about__skills-col--tools  { flex: 1 1 700px; }
+.about__skills-col--honors { flex: 0 0 350px; }
+
+.about__skills-label {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil); opacity: .6;
+}
+
+.about__tags { display: flex; flex-wrap: wrap; gap: 9px; }
+
+/* 19 · 标签 hover 时描边颜色整个填进去、文字转白，像被荧光笔一次涂满 */
+.tag-hand {
+  padding: 4px 10px;
+  border: 1.7px solid var(--tag-c);
+  border-radius: 15px 5px 14px 5px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil);
+  white-space: nowrap;
+  cursor: default;
+  transition: background-color .25s ease, color .25s ease;
+}
+.about__tags--alt .tag-hand { border-radius: 5px 15px 5px 14px; }
+.tag-hand:hover { background: var(--tag-c); color: #fff; }
+
+.about__honor { display: flex; align-items: center; gap: 10px; }
+.about__honor svg { width: 16px; height: 16px; stroke: var(--honor-c); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+.about__honor span {
+  font-family: var(--font-body);
+  font-size: 15.5px; line-height: 1.72;
+  color: var(--pencil); opacity: .85;
+}
+
+/* —— 涂鸦 —— */
+.about__doodles { position: absolute; inset: 0; pointer-events: none; }
+.about__doodles .doodle { position: absolute; }
+
+/* —— 14 · 两组卡片先后落位 ——
+   IntersectionObserver 只触发一次；组内 stagger 0.1s，组间额外 0.25s。
+   读起来有节奏，不是一股脑全冒出来。
+   初始态挂在 .js-anim 下 —— 脚本没跑起来时内容要正常可见。 */
+.js-anim .reveal {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.js-anim .about.is-revealed .reveal {
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s cubic-bezier(.2, .8, .2, 1), transform .5s cubic-bezier(.2, .8, .2, 1);
+  transition-delay: var(--rd, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-anim .reveal { opacity: 1; transform: none; }
+  .about__avatar { animation: none; }
+}
+
+@media (max-width: 1000px) {
+  .about__intro { flex-direction: column; align-items: center; gap: 28px; text-align: center; }
+  .about__labs, .about__cards { grid-template-columns: 1fr; gap: 28px; }
+  .about__skills { flex-direction: column; gap: 32px; }
+  .about__doodles { display: none; }
+  .eb-card__main, .eb-card__sec, .eb-card__time { white-space: normal; }
+}

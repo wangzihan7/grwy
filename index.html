@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZIHAN'S DESK · 王梓涵</title>
+<meta name="description" content="产品经理 / AI 工作流设计 / 数据驱动设计 — 个人作品集">
+
+<link rel="preload" href="fonts/PermanentMarker-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Kalam-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/loader.css">
+<link rel="stylesheet" href="css/navbar.css">
+<link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="css/electric-border.css">
+<link rel="stylesheet" href="css/section-title.css">
+<link rel="stylesheet" href="css/about.css">
+<link rel="stylesheet" href="css/strengths.css">
+<link rel="stylesheet" href="css/work.css">
+<link rel="stylesheet" href="css/work-detail.css">
+<link rel="stylesheet" href="css/work-tags.css">
+<link rel="stylesheet" href="css/contact.css">
+<script>
+/* 入场动画的初始态（opacity:0）只在 JS 可用时才生效。
+   否则脚本一挂，整块内容就永远是透明的。放在 head 里同步执行，
+   避免先渲染出可见状态再被隐藏造成闪烁。 */
+document.documentElement.classList.add('js-anim');
+
+/* 每次进站都直接就在第一屏 —— 不是"滑"回去，是根本没离开过。
+   三件事缺一不可：
+   1. 关掉浏览器的滚动位置记忆，否则刷新会恢复到上次的位置；
+   2. 抹掉地址里的 hash，否则浏览器会自己跳到那一段；
+   3. 置顶时必须绕开 html 上的 scroll-behavior:smooth，
+      否则 scrollTo 会变成一次平滑滚动，人就看见"滑过去"的过程了。
+   ?dev=1 下全部跳过：开发预览要靠 hash 定位到指定板块。 */
+(function () {
+  if (/[?&]dev=/.test(location.search)) return;
+
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+
+  function jumpTop() {
+    var h = document.documentElement, keep = h.style.scrollBehavior;
+    h.style.scrollBehavior = 'auto';     // 绕开 smooth，瞬间到位
+    window.scrollTo(0, 0);
+    h.style.scrollBehavior = keep;
+  }
+  window.__jumpTop = jumpTop;
+
+  jumpTop();
+  document.addEventListener('DOMContentLoaded', jumpTop);
+  window.addEventListener('load', jumpTop);
+})();
+</script>
+</head>
+<body>
+
+<!-- 全站共用的滤镜。ink-wobble 给手绘线条一点永不停歇的蠕动：
+     一张很慢向上滚的噪声图把线的每一点推开约 ±1px，
+     所以那条线看着像刚画上去、墨还没干。 -->
+<svg class="global-defs" width="0" height="0" aria-hidden="true">
+  <defs>
+    <filter id="ink-wobble" x="-4%" y="-260%" width="108%" height="620%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016 0.05" numOctaves="2" seed="7" result="n"/>
+      <feOffset in="n" dx="0" dy="0" result="no">
+        <animate attributeName="dy" values="0;-36" dur="9s" repeatCount="indefinite" calcMode="linear"/>
+      </feOffset>
+      <feDisplacementMap in="SourceGraphic" in2="no" scale="2.4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- ============================================================
+     00 · 开屏 Loading
+     ============================================================ -->
+<div class="loader" id="loader">
+  <div class="loader__doodles">
+    <svg class="doodle" style="left:20.8%;top:24.4%" width="30" height="30" viewBox="-2 -2 34 34" fill="none" aria-hidden="true">
+      <path d="M15 0c1 11 4 14 15 15-11 1-14 4-15 15-1-11-4-14-15-15 11-1 14-4 15-15z" fill="var(--yellow)" opacity=".7"/>
+    </svg>
+    <svg class="doodle" style="left:72.9%;top:26.7%" width="110" height="36" viewBox="-2 -2 114 40" fill="none" aria-hidden="true">
+      <path d="M0 18q14-18 28 0t28 0 28 0 24 0" stroke="var(--pencil)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>
+    </svg>
+    <svg class="doodle" style="left:77.8%;top:71.1%" width="34" height="30" viewBox="-2 -2 38 34" fill="none" aria-hidden="true">
+      <path d="M17 29c-14-10-17-18-14-23 5-6 12-3 14 2 2-5 9-8 14-2 3 5 0 13-14 23z" fill="var(--pink)" opacity=".7"/>
+    </svg>
+    <svg class="doodle" style="left:19.4%;top:68.9%" width="40" height="32" viewBox="-2 -2 44 36" fill="none" aria-hidden="true">
+      <path d="M2 13l36-11-15 28-6-11z m0 0l15 6" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>
+    </svg>
+  </div>
+
+  <!-- 01 · 小人边画边等 -->
+  <svg class="mascot mascot--bounce" width="132" height="150" viewBox="-4 -4 132 150" fill="none" role="img" aria-label="正在加载">
+    <path d="M32 42a28 28 0 1 0 56 0 28 28 0 1 0-56 0m21-25q3-14 13-6m-16 39q10 10 20 0m-10 20l0 32m0-22l-24 14m24-14l26-8m-26 30l-14 30m14-30l14 30"
+          stroke="var(--pencil)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse class="mascot__eye" cx="50" cy="38" rx="4" ry="4" fill="var(--pencil)"/>
+    <ellipse class="mascot__eye" cx="70" cy="38" rx="4" ry="4" fill="var(--pencil)"/>
+    <g transform="translate(84 54)">
+      <path d="M4 22l14-18 6 5-14 17z m0 0l5 3" fill="var(--yellow)" stroke="var(--pencil)" stroke-width="2" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(102 40)" opacity=".7">
+      <path class="mascot__trail" d="M0 20q10-18 20-6t22-8" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round"/>
+    </g>
+  </svg>
+
+  <!-- 02 · 手绘进度条 -->
+  <p class="loader__label">Drawing...</p>
+  <div class="loader__bar"><div class="loader__fill" id="loaderFill"></div></div>
+  <p class="loader__percent"><span id="loaderPercent">0</span>%</p>
+</div>
+
+
+<!-- ============================================================
+     component/Navbar
+     ============================================================ -->
+<header class="navbar" id="navbar">
+  <div class="navbar__bar">
+    <a class="navbar__wordmark" href="#home">ZIHAN'S DESK</a>
+    <nav>
+      <ul class="navbar__menu">
+        <li><a class="nav-item is-active" href="#home" data-nav="home">
+          <span class="nav-item__label">Home</span>
+          <svg class="nav-item__underline" viewBox="0 -3 44 6" fill="none" aria-hidden="true"><path d="M0 1q11-3 22 0t22-1" pathLength="1"/></svg>
+        </a></li>
+        <li><a class="nav-item" href="#about" data-nav="about">
+          <span class="nav-item__label">About</span>
+          <svg class="nav-item__underline" viewBox="0 -3 44 6" fill="none" aria-hidden="true"><path d="M0 1q11-3 22 0t22-1" pathLength="1"/></svg>
+        </a></li>
+        <li><a class="nav-item" href="#strengths" data-nav="strengths">
+          <span class="nav-item__label">Strengths</span>
+          <svg class="nav-item__underline" viewBox="0 -3 44 6" fill="none" aria-hidden="true"><path d="M0 1q11-3 22 0t22-1" pathLength="1"/></svg>
+        </a></li>
+        <li><a class="nav-item" href="#work" data-nav="work">
+          <span class="nav-item__label">Work</span>
+          <svg class="nav-item__underline" viewBox="0 -3 44 6" fill="none" aria-hidden="true"><path d="M0 1q11-3 22 0t22-1" pathLength="1"/></svg>
+        </a></li>
+        <li><a class="nav-item" href="#contact" data-nav="contact">
+          <span class="nav-item__label">Contact</span>
+          <svg class="nav-item__underline" viewBox="0 -3 44 6" fill="none" aria-hidden="true"><path d="M0 1q11-3 22 0t22-1" pathLength="1"/></svg>
+        </a></li>
+      </ul>
+    </nav>
+  </div>
+  <svg class="navbar__rule" viewBox="0 -2 1440 4" preserveAspectRatio="none" fill="none" aria-hidden="true">
+    <path d="M0 0l1440 0"/>
+  </svg>
+</header>
+
+
+<main>
+<!-- ============================================================
+     01 · 首页 Hero
+     ============================================================ -->
+<section class="hero" id="home" data-section="home">
+
+  <!-- 07 · 涂鸦在呼吸 -->
+  <div class="hero__doodles" aria-hidden="true">
+    <svg class="doodle doodle--float" style="left:6.67%;top:21.1%;--dur:4.9s;--delay:-1.2s" width="34" height="34" viewBox="-2 -2 38 38" fill="none">
+      <path d="M17 0c1.4 12.5 4.5 15.6 17 17-12.5 1.4-15.6 4.5-17 17-1.4-12.5-4.5-15.6-17-17 12.5-1.4 15.6-4.5 17-17z" fill="var(--yellow)" opacity=".8"/>
+    </svg>
+    <svg class="doodle doodle--float" style="left:80.6%;top:15.6%;--dur:6.2s;--delay:-4.6s" width="86" height="48" viewBox="-2 -2 90 52" fill="none">
+      <path d="M14 44q-14 0-12-14 1-14 18-13 6-15 24-11 16-3 20 11 20 0 18 15 2 12-16 12z" stroke="var(--pencil)" stroke-width="2" opacity=".45"/>
+    </svg>
+    <svg class="doodle doodle--float" style="left:14.9%;top:43.6%;--dur:5.3s;--delay:-2.9s" width="46" height="38" viewBox="-2 -2 50 42" fill="none">
+      <path d="M2 15l42-13-17 34-7-14z m0 0l18 7" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>
+    </svg>
+    <svg class="doodle doodle--float" style="left:8.3%;top:69.6%;--dur:4.2s;--delay:-3.7s" width="40" height="36" viewBox="-2 -2 44 40" fill="none">
+      <path d="M20 34c-16-12-20-21-16-27 5-7 14-4 16 2 2-6 11-9 16-2 4 6 0 15-16 27z" fill="var(--pink)" opacity=".8"/>
+    </svg>
+    <svg class="doodle doodle--float" style="left:79.6%;top:56.2%;--dur:6.5s;--delay:-5.5s" width="120" height="40" viewBox="-2 -2 124 44" fill="none">
+      <path d="M0 20q15-20 30 0t30 0 30 0 28 0" stroke="var(--pencil)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>
+    </svg>
+    <svg class="doodle doodle--float" style="left:91.8%;top:78.4%;--dur:4.4s;--delay:-0.6s" width="26" height="26" viewBox="-2 -2 30 30" fill="none">
+      <path d="M13 0c1 9.5 3.5 12 13 13-9.5 1-12 3.5-13 13-1-9.5-3.5-12-13-13 9.5-1 12-3.5 13-13z" fill="var(--purple)" opacity=".8"/>
+    </svg>
+    <svg class="doodle doodle--float" style="left:6.67%;top:82.4%;--dur:5.9s;--delay:-6.3s" width="44" height="44" viewBox="-2 -2 48 48" fill="none">
+      <path d="M22 18a4 4 0 1 1-4 4 8 8 0 1 0 8 8 13 13 0 1 1-13-13 19 19 0 1 0 19 19" stroke="var(--pencil)" stroke-width="2" stroke-linecap="round" opacity=".45"/>
+    </svg>
+    <svg class="doodle doodle--float" style="left:86.1%;top:35.3%;--dur:5.1s;--delay:-2.1s" width="54" height="54" viewBox="-2 -2 58 58" fill="none">
+      <path d="M6 48l6-16 26-26 10 10-26 26z m6-16l10 10" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/>
+    </svg>
+  </div>
+
+  <div class="hero__center">
+
+    <!-- 小人 -->
+    <svg class="mascot hero__mascot" width="132" height="150" viewBox="-4 -4 132 150" fill="none" aria-hidden="true">
+      <path d="M32 42a28 28 0 1 0 56 0 28 28 0 1 0-56 0m21-25q3-14 13-6m-16 39q10 10 20 0m-10 20l0 32m0-22l-24 14m24-14l26-8m-26 30l-14 30m14-30l14 30"
+            stroke="var(--pencil)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+      <ellipse cx="46.5" cy="48" rx="6.5" ry="4" fill="var(--pink)" opacity=".5"/>
+      <ellipse cx="73.5" cy="48" rx="6.5" ry="4" fill="var(--pink)" opacity=".5"/>
+      <ellipse class="mascot__eye" cx="50" cy="38" rx="4" ry="4" fill="var(--pencil)"/>
+      <ellipse class="mascot__eye" cx="70" cy="38" rx="4" ry="4" fill="var(--pencil)"/>
+      <g transform="translate(84 54)">
+        <g class="mascot__pencil">
+          <path d="M4 22l14-18 6 5-14 17z m0 0l5 3" fill="var(--yellow)" stroke="var(--pencil)" stroke-width="2" stroke-linejoin="round"/>
+        </g>
+      </g>
+    </svg>
+
+    <!-- 04+05 · 标题一个字母一个字母写出来，六色分组 -->
+    <svg class="hero__title" id="heroTitle" viewBox="0 0 624 140" fill="none" role="img" aria-label="Hi! I'm Wang Zihan">
+      <!-- Hi! -->
+      <g>
+        <path class="ltr" d="M20 100c-1-32 1-62 0-80m0 38c8-5 20 5 30-1m0-37c1 32-1 58 0 80" stroke="var(--pencil)" stroke-width="7.2"/>
+        <path class="ltr" d="M60 28c1-3 3-1 2 2-1 3-3 1-2-2m1 17c0 17 1 37 0 55" stroke="var(--pencil)" stroke-width="7.2"/>
+        <path class="ltr" d="M79 20c1 24-1 42 0 56m0 14c1-3 3-1 2 2-1 3-3 1-2-2" stroke="var(--pencil)" stroke-width="7.2"/>
+      </g>
+      <!-- I'm -->
+      <g transform="translate(14 0)">
+        <path class="ltr" d="M105 20c1 32-1 56 0 80" stroke="var(--orange)" stroke-width="7.2"/>
+        <path class="ltr" d="M119 22c1 6-1 12-3 16" stroke="var(--pencil)" stroke-width="5.76"/>
+        <path class="ltr" d="M132 100c0-22 0-45 0-56 3-14 15-16 20 0 0 18 0 38 0 56m0-56c3-16 15-16 20 0 0 18 0 38 0 56" stroke="var(--pencil)" stroke-width="7.2"/>
+      </g>
+      <!-- Wang -->
+      <g transform="translate(30 0)">
+        <path class="ltr" d="M196 20c4 25 10 52 16 76 4-18 8-36 12-52 4 16 8 34 12 52 6-24 12-51 16-76" stroke="var(--teal)" stroke-width="7.2"/>
+        <path class="ltr" d="M292 52c-6-14-20-14-26-2-6 12-5 34 2 43 7 9 20 6 24-5m0-50c1 22-1 44 0 62" stroke="var(--teal)" stroke-width="7.2"/>
+        <path class="ltr" d="M304 100c0-22 0-44 0-56m0 12c4-16 18-18 24-4 1 18 0 33 0 48" stroke="var(--yellow)" stroke-width="7.2"/>
+        <path class="ltr" d="M372 52c-6-14-20-14-26-2-6 12-5 32 2 41 7 9 20 7 24-3m0-50c1 20-1 40 0 60 0 16-8 26-20 26-6 0-11-3-14-7" stroke="var(--yellow)" stroke-width="7.2"/>
+      </g>
+      <!-- Zihan -->
+      <g transform="translate(36 0)">
+        <path class="ltr" d="M396 22c14-1 30 1 42 0-12 26-28 52-42 77 14 1 30-1 42 0" stroke="var(--pink)" stroke-width="7.2"/>
+        <path class="ltr" d="M448 28c1-3 3-1 2 2-1 3-3 1-2-2m1 17c0 17 1 37 0 55" stroke="var(--pink)" stroke-width="7.2"/>
+        <path class="ltr" d="M466 18c1 28-1 56 0 82m0-44c4-16 18-18 24-4 1 18 0 33 0 48" stroke="var(--purple)" stroke-width="7.2"/>
+        <path class="ltr" d="M530 52c-6-14-20-14-26-2-6 12-5 34 2 43 7 9 20 6 24-5m0-50c1 22-1 44 0 62" stroke="var(--purple)" stroke-width="7.2"/>
+        <path class="ltr" d="M542 100c0-22 0-44 0-56m0 12c4-16 18-18 24-4 1 18 0 33 0 48" stroke="var(--orange)" stroke-width="7.2"/>
+      </g>
+    </svg>
+
+    <!-- 副标题 + 06 · 荧光笔划过 -->
+    <p class="hero__subtitle">
+      <span class="hero__highlighter" aria-hidden="true"></span>
+      <span class="hero__subtitle-text">Product Manager&nbsp; /&nbsp; AI Workflow Designer&nbsp; /&nbsp; Data-Driven Design</span>
+    </p>
+
+    <!-- 08 · 按钮会躲一下 -->
+    <div class="hero__cta">
+      <a class="btn-hand btn-hand--l" href="#work" style="--btn-fill:var(--orange)">
+        <span class="btn-hand__label">View My Work</span>
+      </a>
+      <a class="btn-hand btn-hand--r" href="#contact" style="--btn-fill:var(--teal)">
+        <span class="btn-hand__label">Say Hello</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 11 · 往下看看 -->
+  <button class="hero__scroll-hint" id="scrollHint" type="button" aria-label="向下滚动到关于我">
+    <span class="hero__scroll-hint-inner">
+      <span>scroll down</span>
+      <svg width="20" height="26" viewBox="-2 -2 20 26" fill="none" aria-hidden="true">
+        <path d="M8 0l0 20m0 0l-6-6m6 6l6-6" stroke="var(--pencil)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+  </button>
+
+  <svg class="hero__wave" viewBox="-2 -2 1300 26" preserveAspectRatio="none" fill="none" aria-hidden="true">
+    <path d="M0 12q80-12 160 0t160 0 160 0 160 0 160 0 160 0 160 0 160 0" vector-effect="non-scaling-stroke"/>
+  </svg>
+  <!-- 圆点单独定位：跟着波浪拉伸会被压成椭圆 -->
+  <span class="wave-dot" style="left:29.48%;background:var(--orange)" aria-hidden="true"></span>
+  <span class="wave-dot" style="left:48.92%;background:var(--yellow)" aria-hidden="true"></span>
+  <span class="wave-dot" style="left:68.37%;background:var(--teal)"   aria-hidden="true"></span>
+</section>
+
+
+<!-- ============================================================
+     以下为第 2 批之后的内容占位，仅用于测试吸顶与 scrollspy
+     ============================================================ -->
+<!-- ============================================================
+     02 · 关于我 About
+     ============================================================ -->
+<section class="about" id="about" data-section="about">
+
+  <!-- 电流边框的位移滤镜：一卡一份，seed 不同所以四张卡的形态不会撞。
+       height 必须给足富余 —— feOffset 把噪声上移之后，作用区底部空出的
+       那一条没有噪声就没有位移，边框会被裁出直边。 -->
+  <svg class="eb-defs" width="0" height="0" aria-hidden="true">
+    <defs>
+      <filter id="eb-1" x="-6%" y="-120%" width="112%" height="340%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="5" seed="1" result="noise"/>
+        <feOffset in="noise" dx="0" dy="0" result="off"/>
+        <feDisplacementMap in="SourceGraphic" in2="off" scale="10" xChannelSelector="R" yChannelSelector="B"/>
+      </filter>
+      <filter id="eb-2" x="-6%" y="-120%" width="112%" height="340%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="5" seed="5" result="noise"/>
+        <feOffset in="noise" dx="0" dy="0" result="off"/>
+        <feDisplacementMap in="SourceGraphic" in2="off" scale="10" xChannelSelector="R" yChannelSelector="B"/>
+      </filter>
+      <filter id="eb-3" x="-6%" y="-120%" width="112%" height="340%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="5" seed="11" result="noise"/>
+        <feOffset in="noise" dx="0" dy="0" result="off"/>
+        <feDisplacementMap in="SourceGraphic" in2="off" scale="10" xChannelSelector="R" yChannelSelector="B"/>
+      </filter>
+      <filter id="eb-4" x="-6%" y="-120%" width="112%" height="340%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="5" seed="17" result="noise"/>
+        <feOffset in="noise" dx="0" dy="0" result="off"/>
+        <feDisplacementMap in="SourceGraphic" in2="off" scale="10" xChannelSelector="R" yChannelSelector="B"/>
+      </filter>
+
+      <!-- 手绘纸底：边缘是抖的，不是直线。四张卡共用一份 -->
+      <path d="M0 0.2l8-1.4 8 3.8 7.9-0.3 8-1.6 8-3.1 8 0 7.9 0.7 8 1.5 8 1.2 8 1 7.9 0.6 8-0.9 8 0 8-3.5 7.9 2.3 8-0.5 8-1 8 0 8-0.6 7.9 2.7 8-1.7 8 1.7 8-2.8 7.9 3.6 8 0.4 8-2.9 8 0.5 7.9-1 8-1.5 8 0.4 8 1.9 7.9-0.4 8 3.2 8-3.5 8 1.6 8-2.9 7.9 0.7 8 2 8-0.5 8-0.6 7.9-0.9 8 2.6 8-0.9 8-0.6 7.9 0.6 8-1.6 8 2.4 8-2.4 7.9 0.5 8 0.2 8 2.7 8-1.3 8-2.5 7.9 1 8 2.5 8-2.4 8 2.1 7.9-0.5 8-0.2 8 0.5 8-3.6 7.9 0 8 5.1 8-4.6 8 3.7 7.9-2.8 4.9 5.5 1 8-2.9 8 2.4 8-2.4 7.9 2.5 8-2.5 8 1 8 2.1 7.9-1.6 8 1 8-2.2 8-1.9 7.9 4.3 8-4.1 8 1 8-1.2 7.9 4.3 8-2.1 5.7-8 0.8-8-0.9-7.9 4.3-8-1.7-8-2.7-8 3.5-7.9-0.6-8 2-8-4.7-8 1-7.9-0.5-8 4-8-2.9-8-1.7-7.9 2-8 2.3-8 0-8-1.3-8 2-7.9-0.9-8-4.1-8 0.9-8 3.7-7.9-2-8 2.3-8-2.2-8-0.3-7.9-0.4-8 1.7-8-2.1-8 3.4-7.9-4.5-8-0.5-8 2.1-8 0.9-8 0.5-7.9-0.3-8 0.2-8-1.5-8 1.7-7.9-0.1-8-2.4-8 2.3-8-3-7.9 4.3-8-4.3-8 1.3-8 2.2-7.9-1.7-8 1-8-3.4-8 5.2-8-5.2-7.9 2.8-8-1.2-8 3.1-8-0.5-7.9-3.8-8 1.6-8 1.2-8-0.8-7.9-1.2-8 0.9-8 1-8 1.3-7.9-2.1-5.1-4.1 0.7-8 1.8-8-0.2-8-1.6-7.9 2.2-8-0.6-8 0.5-8-0.6-7.9-1.8-8 2.2-8-1.3-8-0.3-7.9 1.2-8-2.6-8 3.1-8-0.1-7.9 0.7-8z"/>
+
+      <!-- lucide 图标 -->
+      <symbol id="ico-cap" viewBox="0 0 24 24">
+        <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>
+        <path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
+      </symbol>
+      <symbol id="ico-case" viewBox="0 0 24 24">
+        <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        <rect width="20" height="14" x="2" y="6" rx="2"/>
+      </symbol>
+      <symbol id="ico-award" viewBox="0 0 24 24">
+        <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/>
+        <circle cx="12" cy="8" r="6"/>
+      </symbol>
+      <symbol id="ico-trend" viewBox="0 0 24 24">
+        <path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>
+      </symbol>
+      <symbol id="ico-lang" viewBox="0 0 24 24">
+        <path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/>
+        <path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- 19 · 涂鸦在飘 -->
+  <div class="about__doodles" aria-hidden="true">
+    <svg class="doodle doodle--float" style="left:6.4%;top:22.2%;--dur:5.2s;--delay:-1.9s" width="30" height="30" viewBox="-2 -2 34 34" fill="none">
+      <path d="M15 0c1 11 4 14 15 15-11 1-14 4-15 15-1-11-4-14-15-15 11-1 14-4 15-15z" fill="var(--yellow)" opacity=".75"/>
+    </svg>
+    <svg class="doodle doodle--float" style="left:92.4%;top:26.7%;--dur:4.6s;--delay:-3.4s" width="28" height="25" viewBox="-2 -2 32 29" fill="none">
+      <path d="M14 24c-11-8-14-15-11-19 3-5 9-2 11 1 2-3 8-6 11-1 3 4 0 11-11 19z" fill="var(--pink)" opacity=".75"/>
+    </svg>
+    <svg class="doodle doodle--float" style="left:90.3%;top:41.1%;--dur:6.1s;--delay:-5.2s" width="100" height="32" viewBox="-2 -2 104 36" fill="none">
+      <path d="M0 16q13-16 26 0t26 0 26 0 20 0" stroke="var(--pencil)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/>
+    </svg>
+  </div>
+
+  <div class="about__inner">
+
+    <header class="sec-title about__header" style="--st-size:34px;--st-rule-c:var(--orange);--st-rule-w:210px">
+      <h2 class="sec-title__en">About Me</h2>
+      <svg class="sec-title__rule" viewBox="0 -6 210 12" fill="none" aria-hidden="true">
+        <path d="M0 3q26-7 52 0t52 0 52-1 52 1" pathLength="1"/>
+      </svg>
+      <p class="sec-title__cn">关于我</p>
+    </header>
+
+    <div class="about__intro reveal" style="--rd:.08s">
+      <div class="about__avatar-wrap">
+        <div class="about__avatar">
+          <svg width="112" height="126" viewBox="28 2 64 72" fill="none" aria-hidden="true">
+            <path d="M32 42a28 28 0 1 0 56 0 28 28 0 1 0-56 0m21-25q3-14 13-6m-16 39q10 10 20 0"
+                  stroke="var(--pencil)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+            <ellipse cx="46.5" cy="48" rx="6.5" ry="4" fill="var(--pink)" opacity=".5"/>
+            <ellipse cx="73.5" cy="48" rx="6.5" ry="4" fill="var(--pink)" opacity=".5"/>
+            <ellipse class="mascot__eye" cx="50" cy="38" rx="4" ry="4" fill="var(--pencil)"/>
+            <ellipse class="mascot__eye" cx="70" cy="38" rx="4" ry="4" fill="var(--pencil)"/>
+          </svg>
+        </div>
+        <svg class="about__avatar-deco about__avatar-deco--star" width="20" height="20" viewBox="-2 -2 34 34" fill="none" aria-hidden="true">
+          <path d="M15 0c1 11 4 14 15 15-11 1-14 4-15 15-1-11-4-14-15-15 11-1 14-4 15-15z" fill="var(--yellow)" opacity=".85"/>
+        </svg>
+        <svg class="about__avatar-deco about__avatar-deco--heart" width="19" height="17" viewBox="-2 -2 32 29" fill="none" aria-hidden="true">
+          <path d="M14 24c-11-8-14-15-11-19 3-5 9-2 11 1 2-3 8-6 11-1 3 4 0 11-11 19z" fill="var(--pink)" opacity=".75"/>
+        </svg>
+      </div>
+
+      <div class="about__text">
+        <p class="about__lead">Nice to meet you!</p>
+        <p class="about__name">你好！我是王子涵</p>
+        <p class="about__p">梳理复杂的业务逻辑和用户使用场景，把模糊的想法转化成清晰、可落地的产品方案。需求分析、产品规划、数据分析、原型设计、研发协同，也会用 HTML 交互页面把产品逻辑直接演示出来。</p>
+        <p class="about__p">我尤其关注 AI 在真实工作场景中的应用 —— 拆解内容生产和业务操作的流程，把它设计成标准化、可复用的工作流。比起单纯使用 AI 工具，我更在意先看懂业务里真正的问题：把一个模糊的问题拆开、想清楚、再拼回去。</p>
+      </div>
+    </div>
+
+    <div class="about__labs reveal" style="--rd:.16s">
+      <div class="about__lab">
+        <span class="about__lab-en">EDUCATION</span>
+        <svg class="about__lab-rule" viewBox="0 0 38 6" fill="none" aria-hidden="true"><path d="M1 3c11-3 23 3 35 0"/></svg>
+        <span class="about__lab-cn">教育背景</span>
+      </div>
+      <div class="about__lab">
+        <span class="about__lab-en">EXPERIENCE</span>
+        <svg class="about__lab-rule" viewBox="0 0 38 6" fill="none" aria-hidden="true"><path d="M1 3c11-3 23 3 35 0"/></svg>
+        <span class="about__lab-cn">实习经历</span>
+      </div>
+    </div>
+
+    <!-- 四张卡。grid 按行走，所以 DOM 顺序是 教育1 / 实习1 / 教育2 / 实习2，
+         落位延迟按规格 14：教育组先，组内隔 0.1s，组间再停 0.25s -->
+    <div class="about__cards">
+
+      <article class="eb eb-card reveal" data-eb-filter="eb-1" style="--eb-filter:url(#eb-1); --rd:.26s; --card-r:8px 24px 8px 22px; --eb-key:var(--purple); --eb-a:#C7A5FF; --eb-b:#FF85A2; --eb-soft:#C7A5FF14">
+        <svg class="eb-card__paper" viewBox="-7 -7 544 162" preserveAspectRatio="none" aria-hidden="true"><use href="#card-paper"/></svg>
+        <span class="eb__bgglow"></span>
+        <span class="eb__field"><i class="eb__line eb__line--core"></i><i class="eb__line eb__line--g1"></i><i class="eb__line eb__line--g2"></i></span>
+        <div class="eb-card__head">
+          <div class="eb-card__head-l">
+            <span class="eb-card__ico"><svg aria-hidden="true"><use href="#ico-cap"/></svg></span>
+            <span class="eb-card__en">MASTER</span>
+          </div>
+          <span class="eb-card__badge">硕士</span>
+        </div>
+        <div class="eb-card__body">
+          <span class="eb-card__main">西南民族大学</span>
+          <span class="eb-card__sec">网络信息与安全</span>
+        </div>
+      </article>
+
+      <article class="eb eb-card eb-card--flip reveal" data-eb-filter="eb-3" style="--eb-filter:url(#eb-3); --rd:.7s; --card-r:7px 22px 7px 24px; --eb-key:var(--pink); --eb-a:#FF85A2; --eb-b:#C7A5FF; --eb-soft:#FF85A214">
+        <svg class="eb-card__paper" viewBox="-7 -7 544 162" preserveAspectRatio="none" aria-hidden="true"><use href="#card-paper"/></svg>
+        <span class="eb__bgglow"></span>
+        <span class="eb__field"><i class="eb__line eb__line--core"></i><i class="eb__line eb__line--g1"></i><i class="eb__line eb__line--g2"></i></span>
+        <div class="eb-card__head">
+          <div class="eb-card__head-l">
+            <span class="eb-card__ico"><svg aria-hidden="true"><use href="#ico-case"/></svg></span>
+            <span class="eb-card__en">INTERNSHIP</span>
+          </div>
+          <span class="eb-card__time">2026.6 — 2026.8</span>
+        </div>
+        <div class="eb-card__body">
+          <span class="eb-card__main">成都黄裳元吉文化传媒有限公司</span>
+          <span class="eb-card__sec">产品实习生</span>
+        </div>
+      </article>
+
+      <article class="eb eb-card eb-card--flip reveal" data-eb-filter="eb-2" style="--eb-filter:url(#eb-2); --rd:.36s; --card-r:24px 8px 22px 8px; --eb-key:var(--teal); --eb-a:#4ECDC4; --eb-b:#95E1D3; --eb-soft:#4ECDC414">
+        <svg class="eb-card__paper" viewBox="-7 -7 544 162" preserveAspectRatio="none" aria-hidden="true"><use href="#card-paper"/></svg>
+        <span class="eb__bgglow"></span>
+        <span class="eb__field"><i class="eb__line eb__line--core"></i><i class="eb__line eb__line--g1"></i><i class="eb__line eb__line--g2"></i></span>
+        <div class="eb-card__head">
+          <div class="eb-card__head-l">
+            <span class="eb-card__ico"><svg aria-hidden="true"><use href="#ico-cap"/></svg></span>
+            <span class="eb-card__en">BACHELOR</span>
+          </div>
+          <span class="eb-card__badge">本科</span>
+        </div>
+        <div class="eb-card__body">
+          <span class="eb-card__main">成都信息工程大学</span>
+          <span class="eb-card__sec">网络工程</span>
+        </div>
+      </article>
+
+      <article class="eb eb-card reveal" data-eb-filter="eb-4" style="--eb-filter:url(#eb-4); --rd:.8s; --card-r:22px 7px 24px 7px; --eb-key:var(--orange); --eb-a:#FF6B35; --eb-b:#FFD23F; --eb-soft:#FF6B3514">
+        <svg class="eb-card__paper" viewBox="-7 -7 544 162" preserveAspectRatio="none" aria-hidden="true"><use href="#card-paper"/></svg>
+        <span class="eb__bgglow"></span>
+        <span class="eb__field"><i class="eb__line eb__line--core"></i><i class="eb__line eb__line--g1"></i><i class="eb__line eb__line--g2"></i></span>
+        <div class="eb-card__head">
+          <div class="eb-card__head-l">
+            <span class="eb-card__ico"><svg aria-hidden="true"><use href="#ico-case"/></svg></span>
+            <span class="eb-card__en">INTERNSHIP</span>
+          </div>
+          <span class="eb-card__time">2025.12 — 2026.3</span>
+        </div>
+        <div class="eb-card__body">
+          <span class="eb-card__main">北京白鲸科技有限公司</span>
+          <span class="eb-card__sec">产品实习生</span>
+        </div>
+      </article>
+    </div>
+
+    <svg class="about__divider reveal" style="--rd:.95s" viewBox="0 -5 1100 10" preserveAspectRatio="none" fill="none" aria-hidden="true">
+      <path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/>
+    </svg>
+
+    <div class="about__skills reveal" style="--rd:1s">
+      <div class="about__skills-col about__skills-col--tools">
+        <span class="about__skills-label">TOOLBOX &nbsp;·&nbsp; 会用的工具</span>
+        <div class="about__tags">
+          <span class="tag-hand" style="--tag-c:var(--orange)">Axure</span>
+          <span class="tag-hand" style="--tag-c:var(--teal)">XMind</span>
+          <span class="tag-hand" style="--tag-c:var(--purple)">Claude Code</span>
+          <span class="tag-hand" style="--tag-c:var(--pink)">LangGraph</span>
+          <span class="tag-hand" style="--tag-c:var(--green)">FastAPI</span>
+          <span class="tag-hand" style="--tag-c:var(--yellow)">MySQL</span>
+        </div>
+        <div class="about__tags about__tags--alt">
+          <span class="tag-hand" style="--tag-c:var(--pink)">FAISS</span>
+          <span class="tag-hand" style="--tag-c:var(--teal)">Google Flow</span>
+          <span class="tag-hand" style="--tag-c:var(--orange)">A/B 测试</span>
+          <span class="tag-hand" style="--tag-c:var(--purple)">HTML 交互原型</span>
+        </div>
+      </div>
+
+      <div class="about__skills-col about__skills-col--honors">
+        <span class="about__skills-label">HONORS &nbsp;·&nbsp; 在校荣誉</span>
+        <div class="about__honor" style="--honor-c:var(--yellow)"><svg aria-hidden="true"><use href="#ico-award"/></svg><span>三等奖学金</span></div>
+        <div class="about__honor" style="--honor-c:var(--teal)"><svg aria-hidden="true"><use href="#ico-trend"/></svg><span>GPA 专业前 20%</span></div>
+        <div class="about__honor" style="--honor-c:var(--purple)"><svg aria-hidden="true"><use href="#ico-lang"/></svg><span>CET-4 · CET-6</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================
+     03 · 核心能力 Strengths
+     ============================================================ -->
+<section class="strengths" id="strengths" data-section="strengths">
+  <div class="sc-doodles" aria-hidden="true">
+    <svg class="doodle doodle--float" style="left:5.8%;top:18.5%;--dur:5.5s;--delay:-2.4s" width="30" height="30" viewBox="-2 -2 34 34" fill="none"><path d="M15 0c1 11 4 14 15 15-11 1-14 4-15 15-1-11-4-14-15-15 11-1 14-4 15-15z" fill="var(--yellow)" opacity=".75"/></svg>
+    <svg class="doodle doodle--float" style="left:89.6%;top:17.8%;--dur:6.3s;--delay:-4.1s" width="110" height="36" viewBox="-2 -2 114 40" fill="none"><path d="M0 18q14-18 28 0t28 0 28 0 24 0" stroke="var(--pencil)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/></svg>
+    <svg class="doodle doodle--float" style="left:93.6%;top:81.3%;--dur:4.7s;--delay:-1.1s" width="30" height="27" viewBox="-2 -2 32 29" fill="none"><path d="M14 24c-11-8-14-15-11-19 3-5 9-2 11 1 2-3 8-6 11-1 3 4 0 11-11 19z" fill="var(--pink)" opacity=".75"/></svg>
+    <svg class="doodle doodle--float" style="left:4.3%;top:79.8%;--dur:5.9s;--delay:-3.6s" width="40" height="40" viewBox="-2 -2 48 48" fill="none"><path d="M22 18a4 4 0 1 1-4 4 8 8 0 1 0 8 8 13 13 0 1 1-13-13 19 19 0 1 0 19 19" stroke="var(--pencil)" stroke-width="2" stroke-linecap="round" opacity=".4"/></svg>
+  </div>
+
+  <header class="sec-title sc-header" style="--st-size:44px;--st-rule-c:var(--teal);--st-rule-w:280px">
+    <h2 class="sec-title__en">Core Strengths</h2>
+    <svg class="sec-title__rule" viewBox="0 -6 280 12" fill="none" aria-hidden="true"><path d="M0 3q35-7 70 0t70 0 70-1 68 1" pathLength="1"/></svg>
+    <p class="sec-title__cn">核心能力</p>
+  </header>
+
+  <div class="sc-stage" role="group" aria-roledescription="轮播" aria-label="核心能力，四张卡，可拖动翻牌">
+    <button class="sc-arrow sc-arrow--prev" type="button" aria-label="上一张"><svg viewBox="-2 -2 24 18" aria-hidden="true"><path d="M17 7l-14 0m5-5l-5 5 5 5"/></svg></button>
+    <button class="sc-arrow sc-arrow--next" type="button" aria-label="下一张"><svg viewBox="-2 -2 24 18" aria-hidden="true"><path d="M3 7l14 0m-5-5l5 5-5 5"/></svg></button>
+    <div class="sc-track">
+      <article class="sc-card" data-key="01" style="--sc-c:var(--orange)" aria-label="产品经理能力，点击查看详情">
+        <span class="sc-card__tint" aria-hidden="true"></span>
+        <div class="sc-card__top">
+          <span class="sc-card__ico"><svg viewBox="-2 -2 52 52" aria-hidden="true"><path d="M9 7l21 0 9 9 0 26-30 0z m21 0l0 9 9 0m-23 8l15 0m-15 7l11 0"/></svg></span>
+          <span class="sc-card__num">01</span>
+        </div>
+        <div class="sc-card__titles">
+          <span class="sc-card__en">PRODUCT MANAGER</span>
+          <span class="sc-card__cn">产品经理能力</span>
+        </div>
+        <svg class="sc-card__rule" viewBox="0 -4 376 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M0 2q24-4 47 0t47 0 47 0 47 0 47 0 47 0 47 0 45 0" vector-effect="non-scaling-stroke"/></svg>
+        <p class="sc-card__desc">从需求调研到上线落地的完整链路 —— 独立跟完用户行为标签系统和教师团队小程序两个项目。</p>
+        <div class="sc-card__points">
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>需求调研与业务梳理</span></span>
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>产品方案与原型设计</span></span>
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>项目推进与研发协同</span></span>
+        </div>
+        <div class="sc-card__footer">
+          <span class="sc-card__idx">01 / 04</span>
+          <span class="sc-card__more">查看详情<svg viewBox="-2 -2 21 17" aria-hidden="true"><path d="M0 6l15 0m-5-5l5 5-5 5"/></svg></span>
+        </div>
+      </article>
+      <article class="sc-card" data-key="02" style="--sc-c:var(--teal)" aria-label="数据驱动的产品设计，点击查看详情">
+        <span class="sc-card__tint" aria-hidden="true"></span>
+        <div class="sc-card__top">
+          <span class="sc-card__ico"><svg viewBox="-2 -2 52 52" aria-hidden="true"><path d="M7 9l34 0-14 16 0 14-6 4 0-18z m7 7l20 0"/></svg></span>
+          <span class="sc-card__num">02</span>
+        </div>
+        <div class="sc-card__titles">
+          <span class="sc-card__en">DATA-DRIVEN</span>
+          <span class="sc-card__cn">数据驱动的产品设计</span>
+        </div>
+        <svg class="sc-card__rule" viewBox="0 -4 376 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M0 2q24-4 47 0t47 0 47 0 47 0 47 0 47 0 47 0 45 0" vector-effect="non-scaling-stroke"/></svg>
+        <p class="sc-card__desc">用数据找到问题出在哪，用设计把它解决掉，再用数据验证有没有真的解决。</p>
+        <div class="sc-card__points">
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>用户转化漏斗分析</span></span>
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>搜索与内容分发优化</span></span>
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>标签体系与用户识别</span></span>
+        </div>
+        <div class="sc-card__footer">
+          <span class="sc-card__idx">02 / 04</span>
+          <span class="sc-card__more">查看详情<svg viewBox="-2 -2 21 17" aria-hidden="true"><path d="M0 6l15 0m-5-5l5 5-5 5"/></svg></span>
+        </div>
+      </article>
+      <article class="sc-card" data-key="03" style="--sc-c:var(--purple)" aria-label="AI 工作流设计，点击查看详情">
+        <span class="sc-card__tint" aria-hidden="true"></span>
+        <div class="sc-card__top">
+          <span class="sc-card__ico"><svg viewBox="-2 -2 52 52" aria-hidden="true"><path d="M10 13a5 5 0 1 0 10 0 5 5 0 1 0-10 0m19 0a5 5 0 1 0 10 0 5 5 0 1 0-10 0m-10 22a5 5 0 1 0 10 0 5 5 0 1 0-10 0m1-22l9 0m-13 5l6 12m11-12l-6 12"/></svg></span>
+          <span class="sc-card__num">03</span>
+        </div>
+        <div class="sc-card__titles">
+          <span class="sc-card__en">AI WORKFLOW</span>
+          <span class="sc-card__cn">AI 工作流设计</span>
+        </div>
+        <svg class="sc-card__rule" viewBox="0 -4 376 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M0 2q24-4 47 0t47 0 47 0 47 0 47 0 47 0 47 0 45 0" vector-effect="non-scaling-stroke"/></svg>
+        <p class="sc-card__desc">把原本要靠人反复重复的流程拆开，沉淀成 AI 能自己跑完的可复用工作流。</p>
+        <div class="sc-card__points">
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>公众号图文生产工作流</span></span>
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>数字人视频生产工作流</span></span>
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>大模型应用与智能体编排</span></span>
+        </div>
+        <div class="sc-card__footer">
+          <span class="sc-card__idx">03 / 04</span>
+          <span class="sc-card__more">查看详情<svg viewBox="-2 -2 21 17" aria-hidden="true"><path d="M0 6l15 0m-5-5l5 5-5 5"/></svg></span>
+        </div>
+      </article>
+      <article class="sc-card" data-key="04" style="--sc-c:var(--pink)" aria-label="UI 设计与动态内容，点击查看详情">
+        <span class="sc-card__tint" aria-hidden="true"></span>
+        <div class="sc-card__top">
+          <span class="sc-card__ico"><svg viewBox="-2 -2 52 52" aria-hidden="true"><path d="M10 39l4-12 19-19 7 7-19 19z m4-12l7 7m-11 5l6-3m14-25l7 7"/></svg></span>
+          <span class="sc-card__num">04</span>
+        </div>
+        <div class="sc-card__titles">
+          <span class="sc-card__en">UI & MOTION</span>
+          <span class="sc-card__cn">UI 设计与动态内容</span>
+        </div>
+        <svg class="sc-card__rule" viewBox="0 -4 376 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M0 2q24-4 47 0t47 0 47 0 47 0 47 0 47 0 47 0 45 0" vector-effect="non-scaling-stroke"/></svg>
+        <p class="sc-card__desc">从信息架构到高保真界面，再到 AI 生成的动态视觉，一个人能走通全流程。</p>
+        <div class="sc-card__points">
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>产品界面与交互设计</span></span>
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>原型与交互呈现</span></span>
+          <span class="sc-card__point"><svg viewBox="-2 -2 20 17" aria-hidden="true"><path d="M0 6l5 5 10-11"/></svg><span>AI 视频与动态视觉实践</span></span>
+        </div>
+        <div class="sc-card__footer">
+          <span class="sc-card__idx">04 / 04</span>
+          <span class="sc-card__more">查看详情<svg viewBox="-2 -2 21 17" aria-hidden="true"><path d="M0 6l15 0m-5-5l5 5-5 5"/></svg></span>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="sc-hint">
+    <svg class="sc-hint__arrow" viewBox="-2 -2 30 18" aria-hidden="true"><path d="M24 7l-22 0m6-6l-6 6 6 6"/></svg>
+    <svg class="sc-hint__hand" viewBox="-2 -2 34 36" aria-hidden="true"><path d="M10 23l0-16c0-3.5 5-3.5 5 0l0 6m0-2.5c0-2.5 5-2.5 5 0l0 4.5m0-2.5c0-2.5 5-2.5 5 0l0 9.5c0 5-4 7.5-9 7.5l-4 0c-3 0-4.5-2-6-5.5l-3.5-6.5c-2-3 2.5-6.5 4.5-2.5l3 5"/></svg>
+    <span>按住左右拖动翻牌，或者滚轮 · 方向键</span>
+    <svg class="sc-hint__arrow" viewBox="-2 -2 30 18" aria-hidden="true"><path d="M2 7l22 0m-6-6l6 6-6 6"/></svg>
+  </div>
+
+  <div class="sc-dots" role="tablist" aria-label="选择能力卡">
+    <button class="sc-dot is-on" type="button" role="tab" style="--dot-c:var(--orange)" aria-label="第 01 张 产品经理能力" aria-selected="true"></button>
+    <button class="sc-dot" type="button" role="tab" style="--dot-c:var(--teal)" aria-label="第 02 张 数据驱动的产品设计" aria-selected="false"></button>
+    <button class="sc-dot" type="button" role="tab" style="--dot-c:var(--purple)" aria-label="第 03 张 AI 工作流设计" aria-selected="false"></button>
+    <button class="sc-dot" type="button" role="tab" style="--dot-c:var(--pink)" aria-label="第 04 张 UI 设计与动态内容" aria-selected="false"></button>
+  </div>
+</section>
+
+<!-- 24-26 · 详情弹层：面板从被点的那张卡飞过来展开，关闭时反向缩回 -->
+<div class="sc-modal" id="scModal" role="dialog" aria-modal="true">
+  <div class="sc-modal__backdrop"></div>
+  <div class="sc-modal__panel">
+    <button class="sc-modal__close" type="button" aria-label="关闭"><svg viewBox="-2 -2 22 22" aria-hidden="true"><path d="M0 0l18 18m0-18l-18 18"/></svg></button>
+    <div class="sc-modal__scroll">
+    <div data-modal-body="01" data-color="var(--orange)">
+      <div class="sc-modal__head">
+        <div class="sc-modal__head-l">
+          <span class="sc-modal__ico"><svg viewBox="-2 -2 52 52" aria-hidden="true"><path d="M9 7l21 0 9 9 0 26-30 0z m21 0l0 9 9 0m-23 8l15 0m-15 7l11 0"/></svg></span>
+          <div class="sc-modal__titles">
+            <span class="sc-modal__en">01&nbsp; /&nbsp; PRODUCT MANAGER</span>
+            <h3 class="sc-modal__cn">产品经理能力</h3>
+          </div>
+        </div>
+      </div>
+      <svg class="sc-modal__divider" viewBox="0 -4 912 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/></svg>
+      <section class="sc-group" style="--g-c:var(--orange)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">需求调研与业务梳理</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>独立完成用户行为标签识别、教师团队专属小程序等项目的需求调研。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>系统梳理现有小程序后台的业务逻辑、功能结构及关键流程，并据此完成新产品方案设计。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>能够将业务需求拆解为功能模块、业务规则、操作流程及具体产品需求。</span></div>
+      </section>
+      <section class="sc-group" style="--g-c:var(--teal)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">产品方案与原型设计</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>搭建涵盖六大维度的用户行为标签体系，梳理标签识别信号并制定自动匹配规则。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>熟练使用 Axure、XMind 等工具输出流程图、产品原型及高保真页面。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>使用 Claude Code 制作 HTML 可交互原型，直观呈现业务逻辑和页面交互，降低与研发团队的沟通成本。</span></div>
+      </section>
+      <section class="sc-group" style="--g-c:var(--pink)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">项目推进与研发协同</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>具备从需求调研、方案设计、原型制作、需求评审到开发跟进、测试验收及上线落地的全流程经验。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>独立负责教师团队专属小程序的需求沟通及研发协同，持续跟进项目交付。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>能够在产品、研发和运营之间协调需求，及时发现问题并推动解决。</span></div>
+      </section>
+    </div>
+    <div data-modal-body="02" data-color="var(--teal)" hidden>
+      <div class="sc-modal__head">
+        <div class="sc-modal__head-l">
+          <span class="sc-modal__ico"><svg viewBox="-2 -2 52 52" aria-hidden="true"><path d="M7 9l34 0-14 16 0 14-6 4 0-18z m7 7l20 0"/></svg></span>
+          <div class="sc-modal__titles">
+            <span class="sc-modal__en">02&nbsp; /&nbsp; DATA-DRIVEN</span>
+            <h3 class="sc-modal__cn">数据驱动的产品设计</h3>
+          </div>
+        </div>
+      </div>
+      <svg class="sc-modal__divider" viewBox="0 -4 912 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/></svg>
+      <section class="sc-group" style="--g-c:var(--orange)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">用户转化漏斗分析</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>基于用户行为数据搭建「曝光 → 点击 → 注册 → 登录」转化漏斗，定位关键流失节点并制定优化策略。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>通过优化登录入口、信息层级、操作提示及错误反馈，降低用户使用门槛和决策成本。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>结合 A/B 测试持续验证和迭代方案，使登录环节用户流失率由 30% 下降至 17%。</span></div>
+      </section>
+      <section class="sc-group" style="--g-c:var(--teal)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">搜索与内容分发优化</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>参与体育垂类搜索算法及内容分发策略优化，搭建覆盖球队、赛程、PPV、WWE/UFC 等内容的搜索词库。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>重构搜索召回链路，引入长尾词库模糊匹配，并设计体育搜索与通用搜索双链路机制。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>推动体育长尾词命中率提升 60%+，同时提升赛事、直播和专题页面的流量转化效率。</span></div>
+      </section>
+      <section class="sc-group" style="--g-c:var(--pink)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">标签体系与用户识别</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>从六大维度设计用户行为标签体系，明确不同标签对应的行为信号、识别条件及匹配规则。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>将分散的用户行为转化为结构化标签，为用户分层、精细化运营及内容推荐提供支持。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>全程跟进标签系统从需求设计、规则确认到研发落地的实施过程。</span></div>
+      </section>
+    </div>
+    <div data-modal-body="03" data-color="var(--purple)" hidden>
+      <div class="sc-modal__head">
+        <div class="sc-modal__head-l">
+          <span class="sc-modal__ico"><svg viewBox="-2 -2 52 52" aria-hidden="true"><path d="M10 13a5 5 0 1 0 10 0 5 5 0 1 0-10 0m19 0a5 5 0 1 0 10 0 5 5 0 1 0-10 0m-10 22a5 5 0 1 0 10 0 5 5 0 1 0-10 0m1-22l9 0m-13 5l6 12m11-12l-6 12"/></svg></span>
+          <div class="sc-modal__titles">
+            <span class="sc-modal__en">03&nbsp; /&nbsp; AI WORKFLOW</span>
+            <h3 class="sc-modal__cn">AI 工作流设计</h3>
+          </div>
+        </div>
+      </div>
+      <svg class="sc-modal__divider" viewBox="0 -4 912 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/></svg>
+      <section class="sc-group" style="--g-c:var(--orange)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">公众号图文生产工作流</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>调研公众号选题、内容生产、配图及排版的完整流程，并将其沉淀为可复用的 AI 自动化工作流（Skill）。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>工作人员输入公众号主题后，AI 自动完成公开热点及高传播案例调研、文章结构分析、自有素材融合、内容撰写、配图及排版。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>将原本依赖多环节人工处理的内容生产流程标准化，提升内容生产效率和交付一致性。</span></div>
+      </section>
+      <section class="sc-group" style="--g-c:var(--teal)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">数字人视频生产工作流</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>调研并拆解数字人视频从选题到成片的完整制作链路。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>搭建涵盖网络选题发现、优质选题筛选、口播稿改写扩展、音频处理和数字人视频生成的工作流。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>串联 MiniMax 数字人生成能力与自有音频素材，实现从选题、脚本到成片的完整内容生产闭环。</span></div>
+      </section>
+      <section class="sc-group" style="--g-c:var(--pink)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">大模型应用与智能体编排</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>设计基于大语言模型的 Bilibili 智能内容分析系统，用于热点发现、情感分析、主题归纳及用户洞察。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>基于 LangGraph 与 RAG 搭建智能问答链路，拆解为查询改写、向量检索、片段评分、答案生成四个可控节点。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>使用 FastAPI、MySQL、FAISS 完成系统架构设计，通过动态路由与相关性筛选降低模型幻觉风险。</span></div>
+      </section>
+    </div>
+    <div data-modal-body="04" data-color="var(--pink)" hidden>
+      <div class="sc-modal__head">
+        <div class="sc-modal__head-l">
+          <span class="sc-modal__ico"><svg viewBox="-2 -2 52 52" aria-hidden="true"><path d="M10 39l4-12 19-19 7 7-19 19z m4-12l7 7m-11 5l6-3m14-25l7 7"/></svg></span>
+          <div class="sc-modal__titles">
+            <span class="sc-modal__en">04&nbsp; /&nbsp; UI & MOTION</span>
+            <h3 class="sc-modal__cn">UI 设计与动态内容</h3>
+          </div>
+        </div>
+      </div>
+      <svg class="sc-modal__divider" viewBox="0 -4 912 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/></svg>
+      <section class="sc-group" style="--g-c:var(--orange)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">产品界面与交互设计</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>具备后台系统、小程序及登录页面的 UI/UX 设计经验，能够完成信息架构、页面布局和核心操作路径设计。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>优化登录页面的信息层级、主操作按钮、提示文案和错误反馈，缩短用户操作路径。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>设计手机号、验证码、一键登录和第三方账号等多入口登录方式，提升页面易用性。</span></div>
+      </section>
+      <section class="sc-group" style="--g-c:var(--teal)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">原型与交互呈现</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>能够输出流程图、低保真原型、高保真页面及 HTML 可交互原型。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>为用户标签后台、小程序和登录页面设计操作流程及界面方案，帮助研发快速理解复杂业务逻辑。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>注重产品功能、视觉层级和用户操作体验之间的统一。</span></div>
+      </section>
+      <section class="sc-group" style="--g-c:var(--pink)">
+        <div class="sc-group__head">
+          <span class="sc-group__dot"></span>
+          <h4 class="sc-group__title">AI 视频与动态视觉实践</h4>
+        </div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>使用 Claude Code 与 Google Flow 独立完成一支 Vox 风格的视频作品。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>探索 AI 工具在内容表达、画面生成、动态视觉和视频制作中的实际应用。</span></div>
+        <div class="sc-group__li"><svg viewBox="-2 -2 13 20" aria-hidden="true"><path d="M0 8l7 0"/></svg><span>具备将内容策划、AI 生成能力和动态视觉表达相结合的实践经验。</span></div>
+      </section>
+    </div>
+    </div>
+  </div>
+</div>
+<!-- ============================================================
+     04 · 作品集 Work
+     ============================================================ -->
+<section class="work" id="work" data-section="work">
+  <header class="sec-title wk-header" style="--st-size:44px;--st-rule-c:var(--pink);--st-rule-w:190px">
+    <h2 class="sec-title__en">My Work</h2>
+    <svg class="sec-title__rule" viewBox="0 -6 190 12" fill="none" aria-hidden="true"><path d="M0 3q24-7 47 0t47 0 47-1 47 1" pathLength="1"/></svg>
+    <p class="sec-title__cn">作品集</p>
+  </header>
+
+  <div class="wk-stage" role="group" aria-roledescription="轮播" aria-label="作品集，五件作品绕柱子转动，可拖动">
+    <div class="wk-track">
+    <article class="wk-card" data-target="work-vox" style="--wk-c:#E8A317" aria-label="Vox 风格 AI 视频作品，点击查看详情">
+      <div class="wk-card__thumb">
+        <svg class="wk-card__art" viewBox="0 0 440 300" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid meet" color="var(--pencil)">
+          <circle cx="220" cy="118" r="46" stroke-width="2" opacity=".4"/>
+      <path d="M206 98l30 20-30 20z" stroke-width="2" stroke-linejoin="round" opacity=".4"/>
+      <g opacity=".25">
+        <rect x="150" y="196" width="8" height="22" rx="4"/><rect x="172" y="188" width="8" height="38" rx="4"/>
+        <rect x="194" y="192" width="8" height="30" rx="4"/><rect x="216" y="184" width="8" height="46" rx="4"/>
+        <rect x="238" y="190" width="8" height="34" rx="4"/><rect x="260" y="196" width="8" height="22" rx="4"/>
+      </g>
+        </svg>
+        <span class="wk-card__kind">AI 视频</span>
+      </div>
+      <div class="wk-card__info">
+        <div class="wk-card__row">
+          <span class="wk-card__title">Vox 风格 AI 视频作品</span>
+          <span class="wk-card__num">01</span>
+        </div>
+        <p class="wk-card__desc">使用 Claude Code 与 Google Flow 独立完成 · 内容策划 / 画面生成 / 动态剪辑</p>
+        <div class="wk-card__tags">
+          <span class="wk-card__tag">AI 视频</span>
+          <span class="wk-card__tag">内容策划</span>
+          <span class="wk-card__tag">独立完成</span>
+        </div>
+        <span class="wk-card__cta">播放视频<svg viewBox="0 0 15 11" aria-hidden="true"><path d="M0 5.5h13m-4-4.5l4 4.5-4 4.5"/></svg></span>
+      </div>
+    </article>
+    <article class="wk-card" data-target="work-bili" style="--wk-c:#4F8A6B" aria-label="B 站智能内容分析系统，点击查看详情">
+      <div class="wk-card__thumb">
+        <svg class="wk-card__art" viewBox="0 0 440 300" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid meet" color="var(--pencil)">
+          <path d="M148 118l60 0M148 118l28 52M208 118l-32 52M208 118l36 52M176 170l68 0"
+        stroke-width="2" stroke-linecap="round" opacity=".3"/>
+      <g stroke-width="2" opacity=".5" fill="#FFFDF5">
+        <circle cx="148" cy="118" r="14"/><circle cx="208" cy="118" r="14"/>
+        <circle cx="176" cy="170" r="14"/><circle cx="244" cy="170" r="14"/>
+      </g>
+        </svg>
+        <span class="wk-card__kind">PROJECT</span>
+      </div>
+      <div class="wk-card__info">
+        <div class="wk-card__row">
+          <span class="wk-card__title">B 站智能内容分析系统</span>
+          <span class="wk-card__num">02</span>
+        </div>
+        <p class="wk-card__desc">热点发现 · 情感分析 · 主题归纳 —— 用 LangGraph 把问答链路拆成四个可控节点</p>
+        <div class="wk-card__tags">
+          <span class="wk-card__tag">LangGraph</span>
+          <span class="wk-card__tag">数据分析</span>
+          <span class="wk-card__tag">大模型应用</span>
+        </div>
+        <span class="wk-card__cta">查看系统<svg viewBox="0 0 15 11" aria-hidden="true"><path d="M0 5.5h13m-4-4.5l4 4.5-4 4.5"/></svg></span>
+      </div>
+    </article>
+    <article class="wk-card" data-target="work-teacher" style="--wk-c:#2FA89E" aria-label="教师团队专属小程序，点击查看详情">
+      <div class="wk-card__thumb">
+        <svg class="wk-card__art" viewBox="0 0 440 300" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid meet" color="var(--pencil)">
+          <rect x="172" y="70" width="96" height="180" rx="16" stroke-width="2" opacity=".4"/>
+      <rect x="200" y="82" width="40" height="9" rx="4.5" fill="currentColor" stroke="none" opacity=".3"/>
+      <g fill="currentColor" stroke="none" opacity=".25">
+        <rect x="188" y="112" width="64" height="9" rx="4.5"/>
+        <rect x="188" y="136" width="48" height="9" rx="4.5"/>
+        <rect x="188" y="160" width="32" height="9" rx="4.5"/>
+      </g>
+        </svg>
+        <span class="wk-card__kind">PROTOTYPE</span>
+      </div>
+      <div class="wk-card__info">
+        <div class="wk-card__row">
+          <span class="wk-card__title">教师团队专属小程序</span>
+          <span class="wk-card__num">03</span>
+        </div>
+        <p class="wk-card__desc">梳理现有后台业务逻辑 · 需求调研 · 功能规划与原型设计</p>
+        <div class="wk-card__tags">
+          <span class="wk-card__tag">原型设计</span>
+          <span class="wk-card__tag">业务梳理</span>
+          <span class="wk-card__tag">小程序</span>
+        </div>
+        <span class="wk-card__cta">查看原型<svg viewBox="0 0 15 11" aria-hidden="true"><path d="M0 5.5h13m-4-4.5l4 4.5-4 4.5"/></svg></span>
+      </div>
+    </article>
+    <article class="wk-card" data-target="work-flow" style="--wk-c:#8B5CF6" aria-label="AI 内容生产工作流，点击查看详情">
+      <div class="wk-card__thumb">
+        <svg class="wk-card__art" viewBox="0 0 440 300" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid meet" color="var(--pencil)">
+          <g stroke-width="2" opacity=".4">
+        <rect x="96" y="96" width="66" height="54" rx="9"/>
+        <rect x="187" y="96" width="66" height="54" rx="9"/>
+        <rect x="278" y="96" width="66" height="54" rx="9"/>
+      </g>
+      <g stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".35">
+        <path d="M166 123h15m-5-5l5 5-5 5"/><path d="M257 123h15m-5-5l5 5-5 5"/>
+      </g>
+      <path d="M129 155v34h182v-34" stroke-width="2" stroke-linecap="round" opacity=".3"/>
+      <path d="M124 178l5 12 5-12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".3"/>
+        </svg>
+        <span class="wk-card__kind">AI SKILL</span>
+      </div>
+      <div class="wk-card__info">
+        <div class="wk-card__row">
+          <span class="wk-card__title">AI 内容生产工作流</span>
+          <span class="wk-card__num">04</span>
+        </div>
+        <p class="wk-card__desc">公众号图文与数字人视频两条链路，拆解后固化成可复用的工作流</p>
+        <div class="wk-card__tags">
+          <span class="wk-card__tag">AI 工作流</span>
+          <span class="wk-card__tag">流程设计</span>
+          <span class="wk-card__tag">内容生产</span>
+        </div>
+        <span class="wk-card__cta">查看链路<svg viewBox="0 0 15 11" aria-hidden="true"><path d="M0 5.5h13m-4-4.5l4 4.5-4 4.5"/></svg></span>
+      </div>
+    </article>
+    <article class="wk-card" data-target="work-tags" style="--wk-c:#FF6B35" aria-label="用户行为标签识别系统，点击查看详情">
+      <div class="wk-card__thumb">
+        <svg class="wk-card__art" viewBox="0 0 440 300" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid meet" color="var(--pencil)">
+          <g stroke-width="2" opacity=".4">
+        <rect x="104" y="112" width="112" height="42" rx="10"/>
+        <rect x="232" y="112" width="86" height="42" rx="10"/>
+        <rect x="104" y="174" width="80" height="42" rx="10"/>
+        <rect x="200" y="174" width="118" height="42" rx="10"/>
+      </g>
+        </svg>
+        <span class="wk-card__kind">PROTOTYPE</span>
+      </div>
+      <div class="wk-card__info">
+        <div class="wk-card__row">
+          <span class="wk-card__title">用户行为标签识别系统</span>
+          <span class="wk-card__num">05</span>
+        </div>
+        <p class="wk-card__desc">六大维度标签体系 · 自动匹配规则 · 全程跟进开发测试与上线</p>
+        <div class="wk-card__tags">
+          <span class="wk-card__tag">原型设计</span>
+          <span class="wk-card__tag">需求调研</span>
+          <span class="wk-card__tag">研发协同</span>
+        </div>
+        <span class="wk-card__cta">查看流程<svg viewBox="0 0 15 11" aria-hidden="true"><path d="M0 5.5h13m-4-4.5l4 4.5-4 4.5"/></svg></span>
+      </div>
+    </article>
+    </div>
+  </div>
+
+  <div class="wk-hint">
+    <svg class="wk-hint__arrow" viewBox="-2 -2 30 18" aria-hidden="true"><path d="M24 7l-22 0m6-6l-6 6 6 6"/></svg>
+    <svg class="wk-hint__hand" viewBox="-2 -2 34 36" aria-hidden="true"><path d="M10 23l0-16c0-3.5 5-3.5 5 0l0 6m0-2.5c0-2.5 5-2.5 5 0l0 4.5m0-2.5c0-2.5 5-2.5 5 0l0 9.5c0 5-4 7.5-9 7.5l-4 0c-3 0-4.5-2-6-5.5l-3.5-6.5c-2-3 2.5-6.5 4.5-2.5l3 5"/></svg>
+    <span>按住左右拖动可旋转</span>
+    <svg class="wk-hint__arrow" viewBox="-2 -2 30 18" aria-hidden="true"><path d="M2 7l22 0m-6-6l6 6-6 6"/></svg>
+  </div>
+
+  <p class="wk-tip">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3v9m0-9a1.6 1.6 0 0 1 3.2 0v5m0-5a1.6 1.6 0 0 1 3.2 0v5m0-3a1.6 1.6 0 0 1 3.2 0v6.2c0 3.4-2.6 5-6 5h-2.6c-2 0-3-1.4-4-3.7l-2.2-4.4c-1.3-2 1.6-4.4 3-1.7l2 3.4"/></svg>
+    点击卡片查看该作品详情
+  </p>
+
+  <div class="wk-dots" role="tablist" aria-label="选择作品">
+    <button class="wk-dot is-on" type="button" role="tab" style="--dot-c:#E8A317" aria-label="第 01 件 Vox 风格 AI 视频作品" aria-selected="true"></button>
+    <button class="wk-dot" type="button" role="tab" style="--dot-c:#4F8A6B" aria-label="第 02 件 B 站智能内容分析系统" aria-selected="false"></button>
+    <button class="wk-dot" type="button" role="tab" style="--dot-c:#2FA89E" aria-label="第 03 件 教师团队专属小程序" aria-selected="false"></button>
+    <button class="wk-dot" type="button" role="tab" style="--dot-c:#8B5CF6" aria-label="第 04 件 AI 内容生产工作流" aria-selected="false"></button>
+    <button class="wk-dot" type="button" role="tab" style="--dot-c:#FF6B35" aria-label="第 05 件 用户行为标签识别系统" aria-selected="false"></button>
+  </div>
+</section>
+
+<!-- 28 · 作品详情不是弹窗，就在转盘下方依次往下排。
+     这一批先立好锚点与滚动联动，内容下一批填。 -->
+<section class="wd wd--alt" id="work-vox" data-index="0" style="--wd-c:#E8A317">
+  <div class="wd__inner">
+    <div class="wd__head">
+      <div class="wd__head-l">
+        <h3 class="wd__title">Vox 风格 AI 视频作品</h3>
+        <p class="wd__sub">一支讲郑和下西洋的解释性短片 · 用 Claude Code + Google Flow 独立完成，从选题、脚本、分镜到画面生成与成片</p>
+      </div>
+      <div class="wd__meta">
+        <div class="wd__meta-row"><span class="wd__meta-k">片长</span><span class="wd__meta-v">00:33</span></div>
+        <div class="wd__meta-row"><span class="wd__meta-k">工具</span><span class="wd__meta-v">Claude Code + Google Flow</span></div>
+        <div class="wd__meta-row"><span class="wd__meta-k">形式</span><span class="wd__meta-v">选题到成片，全流程独立完成</span></div>
+      </div>
+    </div>
+    <svg class="wd__divider" viewBox="0 -4 1200 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/></svg>
+    <div class="wd__body">
+      <div class="wd__main">
+        <div class="vox-player" data-video role="button" tabindex="0" aria-label="播放 Vox 视频作品，时长 33 秒">
+          <video preload="metadata" poster="media/vox-poster.jpg" playsinline>
+            <source src="media/vox-full.mp4" type="video/mp4">
+            你的浏览器不支持内嵌视频，可以<a href="media/vox-full.mp4">直接下载观看</a>。
+          </video>
+          <span class="vox-player__scrim" aria-hidden="true"></span>
+          <button class="vox-player__btn" type="button" aria-label="播放">
+            <svg viewBox="0 0 23 27" aria-hidden="true"><path d="M0 0l23 13.5L0 27z"/></svg>
+          </button>
+          <span class="vox-player__hint">点击播放</span>
+          <div class="vox-player__bar">
+            <span class="vox-player__dur">00:33</span>
+            <button class="vox-player__fs" type="button" aria-label="全屏观看">
+              <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M2 8V2h6M20 8V2h-6M2 14v6h6M20 14v6h-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="wd__side">
+        <span class="wd__side-lab">画面风格</span>
+        <div class="vox-shots">
+          <img class="vox-shot" style="--i:0" src="media/vox-shot-01.jpg" alt="Vox 视频关键帧 01" loading="lazy" decoding="async">
+          <img class="vox-shot" style="--i:1" src="media/vox-shot-02.jpg" alt="Vox 视频关键帧 02" loading="lazy" decoding="async">
+          <img class="vox-shot" style="--i:2" src="media/vox-shot-03b.jpg" alt="Vox 视频关键帧 03" loading="lazy" decoding="async">
+          <img class="vox-shot" style="--i:3" src="media/vox-shot-04.jpg" alt="Vox 视频关键帧 04" loading="lazy" decoding="async">
+        </div>
+      </div>
+    </div>
+    <div class="wd-flow">
+      <span class="wd-flow__lab">制作流程</span>
+      <span class="wd-flow__chip" style="--i:0">选题脚本</span>
+      <svg class="wd-flow__arrow" style="--i:1" viewBox="0 0 13 9" aria-hidden="true"><path d="M0 4.5h11m-4-4l4 4-4 4"/></svg>
+      <span class="wd-flow__chip" style="--i:1">分镜拆解</span>
+      <svg class="wd-flow__arrow" style="--i:2" viewBox="0 0 13 9" aria-hidden="true"><path d="M0 4.5h11m-4-4l4 4-4 4"/></svg>
+      <span class="wd-flow__chip" style="--i:2">画面生成</span>
+      <svg class="wd-flow__arrow" style="--i:3" viewBox="0 0 13 9" aria-hidden="true"><path d="M0 4.5h11m-4-4l4 4-4 4"/></svg>
+      <span class="wd-flow__chip" style="--i:3">动态图表</span>
+      <svg class="wd-flow__arrow" style="--i:4" viewBox="0 0 13 9" aria-hidden="true"><path d="M0 4.5h11m-4-4l4 4-4 4"/></svg>
+      <span class="wd-flow__chip" style="--i:4">剪辑合成</span>
+    </div>
+  </div>
+</section>
+
+<section class="wd" id="work-bili" data-index="1" style="--wd-c:#4F8A6B">
+  <div class="wd__inner">
+    <div class="wd__head">
+      <div class="wd__head-l">
+        <h3 class="wd__title">B 站智能内容分析系统</h3>
+        <p class="wd__sub">围绕一个选题，把 B 站相关视频的评论和弹幕抓下来，建成能直接提问的知识库 —— 观众在讨论什么、想看什么、槽点集中在哪，不用再自己翻评论区</p>
+      </div>
+      <div class="wd__meta">
+        <div class="wd__meta-row"><span class="wd__meta-k">角色</span><span class="wd__meta-v">需求、架构到具体实现</span></div>
+        <div class="wd__meta-row"><span class="wd__meta-k">核心</span><span class="wd__meta-v">选题驱动的内容分析：采集 → 建库 → 问答</span></div>
+        <div class="wd__meta-row"><span class="wd__meta-k">形态</span><span class="wd__meta-v">采集、数据集、选题、报告与后台</span></div>
+      </div>
+    </div>
+    <svg class="wd__divider" viewBox="0 -4 1200 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/></svg>
+    <div class="bili-body">
+      <div class="bili-main">
+        <div class="vox-player" data-video role="button" tabindex="0" aria-label="播放 B 站系统操作演示，时长 2 分 49 秒" style="aspect-ratio:820/350">
+          <video preload="metadata" poster="media/bili-poster.jpg" playsinline>
+            <source src="media/bili-full.mp4" type="video/mp4">
+            你的浏览器不支持内嵌视频，可以<a href="media/bili-full.mp4">直接下载观看</a>。
+          </video>
+          <span class="vox-player__scrim" aria-hidden="true"></span>
+          <button class="vox-player__btn" type="button" aria-label="播放">
+            <svg viewBox="0 0 23 27" aria-hidden="true"><path d="M0 0l23 13.5L0 27z"/></svg>
+          </button>
+          <span class="vox-player__hint">点击播放</span>
+          <div class="vox-player__bar">
+            <span class="vox-player__dur">02:49</span>
+            <button class="vox-player__fs" type="button" aria-label="全屏观看">
+              <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M2 8V2h6M20 8V2h-6M2 14v6h6M20 14v6h-6"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="bili-points">
+          <div class="bili-point" style="--i:0">
+            <div class="bili-point__h"><span class="bili-point__n">①</span><span class="bili-point__t">采集与入库</span></div>
+            <p class="bili-point__d">关键词搜到相关视频，把视频信息、评论、弹幕一并抓下来清洗入库。一个选题对应一批视频，构成一个独立数据集。</p>
+          </div>
+          <div class="bili-point" style="--i:1">
+            <div class="bili-point__h"><span class="bili-point__n">②</span><span class="bili-point__t">向量化与数据集隔离</span></div>
+            <p class="bili-point__d">每个数据集单独切分、做 embedding，存成各自的 FAISS 索引。提问时只在选中的数据集内召回，不同选题的语料互不干扰。</p>
+          </div>
+          <div class="bili-point" style="--i:2">
+            <div class="bili-point__h"><span class="bili-point__n">③</span><span class="bili-point__t">双模型分工与溯源</span></div>
+            <p class="bili-point__d">judge 只判相关性和改写问题，chat 只负责生成。文档带标题和链接进 prompt，结论能回溯到具体哪条评论。</p>
+          </div>
+        </div>
+      </div>
+      <div class="bili-side">
+        <span class="wd__side-lab">问答链路 · LangGraph</span>
+        <div class="bili-flow">
+          <svg class="bili-flow__lines" viewBox="0 0 380 512" fill="none" aria-hidden="true">
+            <path class="flow-main" data-edge="e1" d="M185 113v14m-4-4l4 4 4-4" vector-effect="non-scaling-stroke"/>
+            <path class="flow-main" data-edge="e2" d="M185 212v14m-4-4l4 4 4-4" vector-effect="non-scaling-stroke"/>
+            <path class="flow-main" data-edge="e3" d="M185 311v14m-4-4l4 4 4-4" vector-effect="non-scaling-stroke"/>
+            <path class="flow-retry" data-edge="branch" d="M330 170h12a8 8 0 0 1 8 8v235a8 8 0 0 1-8 8h-12" vector-effect="non-scaling-stroke"/>
+            <path class="flow-loop" pathLength="1" d="M40 421H14a8 8 0 0 1-8-8V78a8 8 0 0 1 8-8h26" vector-effect="non-scaling-stroke"/>
+            <path class="flow-loop" pathLength="1" d="M34 64l8 6-8 6" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <div class="bili-node" data-node="retrieve" style="top:32px">
+            <div class="bili-node__h"><span class="bili-node__en">retrieve</span><span class="bili-node__cn">检索</span></div>
+            <p class="bili-node__d">先扩写短问题，再从 FAISS 召回 top-15</p>
+          </div>
+          <div class="bili-node" data-node="grade" style="top:131px">
+            <div class="bili-node__h"><span class="bili-node__en">grade_documents</span><span class="bili-node__cn">逐篇打分</span></div>
+            <p class="bili-node__d">judge 模型并发判断相关性，只留 yes</p>
+          </div>
+          <div class="bili-node" data-node="generate" style="top:230px">
+            <div class="bili-node__h"><span class="bili-node__en">generate</span><span class="bili-node__cn">生成回答</span></div>
+            <p class="bili-node__d">带标题与链接进 prompt，SSE 流式</p>
+          </div>
+          <div class="bili-node bili-node--retry" data-node="transform" style="top:383px">
+            <div class="bili-node__h"><span class="bili-node__en">transform_query</span><span class="bili-node__cn">改写问题</span></div>
+            <p class="bili-node__d">补全代词与序号指代，重来一轮</p>
+          </div>
+          <div class="bili-end" data-node="end" style="top:329px">回答 + 可溯源出处</div>
+          <span class="bili-flow__tag" style="left:197px;top:212px">有相关文档</span>
+          <span class="bili-flow__tag bili-flow__tag--retry" style="left:362px;top:156px">一篇都不相关</span>
+          <span class="bili-flow__note">改写后回到最上面的检索 · 自我纠错</span>
+        </div>
+      </div>
+    </div>
+    <div class="bili-stack">
+      <span class="bili-stack__lab">技术栈</span>
+      <span class="bili-chip">LangGraph</span>
+      <span class="bili-chip">LangChain</span>
+      <span class="bili-chip">FAISS</span>
+      <span class="bili-chip">FastAPI + SSE</span>
+      <span class="bili-chip">Vue 3 + TS</span>
+      <span class="bili-chip">Element Plus</span>
+      <span class="bili-chip">ECharts</span>
+      <span class="bili-chip">MySQL</span>
+    </div>
+  </div>
+</section>
+
+<section class="wd wd--alt" id="work-teacher" data-index="2" style="--wd-c:#2FA89E">
+  <div class="wd__inner">
+    <div class="wd__head">
+      <div class="wd__head-l">
+        <h3 class="wd__title">教师团队专属小程序</h3>
+        <p class="wd__sub">面向国学养生方向的学习小程序 · 课程以讲次推进，单门 5 讲起，完整学习周期跨度以月计</p>
+      </div>
+      <div class="wd__meta">
+        <div class="wd__meta-row"><span class="wd__meta-k">角色</span><span class="wd__meta-v">需求调研到研发协同</span></div>
+        <div class="wd__meta-row"><span class="wd__meta-k">主线</span><span class="wd__meta-v">用户痛点 → 解决思路 → 页面与后台</span></div>
+        <div class="wd__meta-row"><span class="wd__meta-k">形态</span><span class="wd__meta-v">小程序 + 后台</span></div>
+      </div>
+    </div>
+    <svg class="wd__divider" viewBox="0 -4 1200 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/></svg>
+    <div class="tm1" id="tm1">
+      <svg class="tm1__lines" viewBox="0 0 1200 520" fill="none" aria-hidden="true">
+        <path class="tm1-line" pathLength="1" stroke-width="1.5" stroke-opacity=".45" d="M112 60c26-2 38-24 74-28" vector-effect="non-scaling-stroke"/>
+        <path class="tm1-line" pathLength="1" stroke-width="1.5" stroke-opacity=".45" d="M894 62c24 2 34 20 54 24" vector-effect="non-scaling-stroke"/>
+        <g transform="translate(130 208)">
+          <path class="tm1-line tm1-flow" data-pair="01" pathLength="1" d="M430 2c-90 8-230 32-330 74-30 12-60 26-88 36" vector-effect="non-scaling-stroke"/>
+          <path class="tm1-line tm1-arrow tm1-flow" data-pair="01" pathLength="1" d="M12 112l15-3m-15 3l9-13" vector-effect="non-scaling-stroke"/>
+        </g>
+        <g transform="translate(516 208)">
+          <path class="tm1-line tm1-flow" data-pair="02" pathLength="1" d="M84 2c-6 40-24 90-54 130-9 18-18 36-24 48" vector-effect="non-scaling-stroke"/>
+          <path class="tm1-line tm1-arrow tm1-flow" data-pair="02" pathLength="1" d="M6 180l13-7m-13 7l2-15" vector-effect="non-scaling-stroke"/>
+        </g>
+        <g transform="translate(636 208)">
+          <path class="tm1-line tm1-flow" data-pair="03" pathLength="1" d="M4 2c58 10 148 28 228 56 34 12 59 30 72 42" vector-effect="non-scaling-stroke"/>
+          <path class="tm1-line tm1-arrow tm1-flow" data-pair="03" pathLength="1" d="M304 100l-15-3m15 3l-9-12" vector-effect="non-scaling-stroke"/>
+        </g>
+      </svg>
+      <svg class="tm1-person" style="left:4.1667%;top:1.9231%;width:4.6667%;--dur:5.5s;--delay:-1.8s" viewBox="0 0 86 240" aria-hidden="true">
+        <path d="M43 4c-12.2 0-22 9.8-22 22 0 12.2 9.8 22 22 22 12.2 0 22-9.8 22-22 0-12.2-9.8-22-22-22z m0 50c-23 0-35 18-37 46l0 138 74 0 0-138c-2-28-14-46-37-46z" fill="#E8A6A0"/>
+      </svg>
+      <svg class="tm1-person" style="left:79.3333%;top:4.2308%;width:3.8333%;--dur:6.2s;--delay:-3.4s" viewBox="0 0 86 240" aria-hidden="true">
+        <path d="M43 4c-12.2 0-22 9.8-22 22 0 12.2 9.8 22 22 22 12.2 0 22-9.8 22-22 0-12.2-9.8-22-22-22z m0 50c-23 0-35 18-37 46l0 138 74 0 0-138c-2-28-14-46-37-46z" fill="#8FC7C0"/>
+      </svg>
+      <svg class="tm1-person" style="left:87.0000%;top:1.9231%;width:4.6667%;--dur:7s;--delay:-0.9s" viewBox="0 0 86 240" aria-hidden="true">
+        <path d="M43 4c-12.2 0-22 9.8-22 22 0 12.2 9.8 22 22 22 12.2 0 22-9.8 22-22 0-12.2-9.8-22-22-22z m0 50c-23 0-35 18-37 46l0 138 74 0 0-138c-2-28-14-46-37-46z" fill="#B9A6DC"/>
+      </svg>
+      <div class="tm1-pains" style="left:15.8333%;top:1.1538%;width:58.3333%">
+        <div class="tm1-pains__side"><span>用</span><span>户</span><span>痛</span><span>点</span></div>
+        <div class="tm1-pains__list">
+          <div class="tm1-pain" data-pair="01" style="--i:0" tabindex="0">
+            <span class="tm1-pain__n">01</span>
+            <span class="tm1-pain__t">缺少阶段性反馈</span>
+            <span class="tm1-pain__s">完成一讲和完成十讲，界面上没有区别</span>
+          </div>
+          <div class="tm1-pain" data-pair="02" style="--i:1" tabindex="0">
+            <span class="tm1-pain__n">02</span>
+            <span class="tm1-pain__t">没有进度坐标</span>
+            <span class="tm1-pain__s">只有单门课的进度条，看不到自己在整体路径上的位置</span>
+          </div>
+          <div class="tm1-pain" data-pair="03" style="--i:2" tabindex="0">
+            <span class="tm1-pain__n">03</span>
+            <span class="tm1-pain__t">缺少外部驱动</span>
+            <span class="tm1-pain__s">全靠个人自律，中断之后没有机制把学员叫回来</span>
+          </div>
+        </div>
+      </div>
+      <div class="tm1-group" style="left:1.6667%;top:31.1538%;width:14.1667%">
+        <span class="tm1-group__k">A&nbsp;&nbsp; 50–65 岁女性 · 主力</span>
+        <span class="tm1-group__s">已购课并持续学习，关注自己的进度与阶位</span>
+      </div>
+      <div class="tm1-group" style="left:75.0000%;top:31.1538%;width:24.1667%;gap:14px">
+        <span style="display:flex;flex-direction:column;gap:3px"><span class="tm1-group__k">B&nbsp;&nbsp; 50–65 岁男性</span><span class="tm1-group__s">已购课但中途停止打卡</span></span>
+        <span style="display:flex;flex-direction:column;gap:3px"><span class="tm1-group__k">C&nbsp;&nbsp; 子女辈 · 分享触达</span><span class="tm1-group__s">经分享进入、尚未购课</span></span>
+      </div>
+      <div class="tm1-head" style="left:41.0000%;top:33.8462%">
+        <span class="tm1-head__dot"></span>
+        <span class="tm1-head__cn">解决思路</span>
+        <span class="tm1-head__en">HOW I SOLVED IT</span>
+      </div>
+      <div class="tm1-fix" data-pair="01" tabindex="0" style="left:2.5000%;top:61.9231%;width:30.0833%;--r:-1.2deg;--tm-c:var(--teal);--tm-glow:rgba(78,205,196,.5);--i:0">
+        <div class="tm1-fix__r">
+          <span class="tm1-fix__pill">打卡即得分</span>
+          <span class="tm1-fix__map">← 对 01</span>
+        </div>
+        <p class="tm1-fix__s">进度达标即可打卡 +1 分，分享再加。做完一讲，当场有回应。</p>
+      </div>
+      <div class="tm1-fix" data-pair="02" tabindex="0" style="left:36.5000%;top:76.9231%;width:30.0833%;--r:0.9deg;--tm-c:var(--orange);--tm-glow:rgba(255,107,53,.45);--i:1">
+        <div class="tm1-fix__r">
+          <span class="tm1-fix__pill">四境十六阶</span>
+          <span class="tm1-fix__map">← 对 02</span>
+        </div>
+        <p class="tm1-fix__s">四境各四阶，对应积分区间与图腾徽章。各门课的学习量，换成同一条路径上的坐标。</p>
+      </div>
+      <div class="tm1-fix" data-pair="03" tabindex="0" style="left:70.8333%;top:60.0000%;width:30.0833%;--r:-0.7deg;--tm-c:var(--purple);--tm-glow:rgba(199,165,255,.55);--i:2">
+        <div class="tm1-fix__r">
+          <span class="tm1-fix__pill">连续打卡 + 分享</span>
+          <span class="tm1-fix__map">← 对 03</span>
+        </div>
+        <p class="tm1-fix__s">连续天数断一天归零，中断有了代价；分享加分，顺带触达未购课的人。</p>
+      </div>
+    </div>
+
+    <h4 class="tm2__screen-title">页面设计与操作流程</h4>
+    <p class="tm2__screen-sub">围绕「完成一讲 → 即时反馈 → 查看进阶」这条主线设计的三个核心页面</p>
+
+    <div class="tm2" id="tm2">
+      <div class="tm2__phones">
+        <figure class="tm2-phone" data-step="1" style="--i:0">
+          <div class="phone-shell" data-lb="teacher" data-lb-kind="phone" data-lb-src="proto/phone-1.jpg" data-lb-alt="教师小程序 · 打卡分享 页面完整原型" data-lb-caption="打卡分享 · 完整页面（可上下滚动，← → 切换）" role="button" aria-label="放大查看 打卡分享 页面">
+            <span class="phone-shell__island" aria-hidden="true"></span>
+            <div class="phone-shell__screen">
+              <img src="proto/phone-1-thumb.jpg" alt="教师小程序 打卡分享 页面" decoding="async">
+            </div>
+            <span class="phone-shell__home" aria-hidden="true"></span>
+          </div>
+          <figcaption>
+            <span class="tm2-phone__step">1 Step</span>
+            <span class="tm2-phone__name">打卡分享</span>
+          </figcaption>
+        </figure>
+        <figure class="tm2-phone tm2-phone--low" data-step="2" style="--i:1">
+          <div class="phone-shell" data-lb="teacher" data-lb-kind="phone" data-lb-src="proto/phone-2.jpg" data-lb-alt="教师小程序 · 打卡成功 页面完整原型" data-lb-caption="打卡成功 · 完整页面（可上下滚动，← → 切换）" role="button" aria-label="放大查看 打卡成功 页面">
+            <span class="phone-shell__island" aria-hidden="true"></span>
+            <div class="phone-shell__screen">
+              <img src="proto/phone-2-thumb.jpg" alt="教师小程序 打卡成功 页面" decoding="async">
+            </div>
+            <span class="phone-shell__home" aria-hidden="true"></span>
+          </div>
+          <figcaption>
+            <span class="tm2-phone__step">2 Step</span>
+            <span class="tm2-phone__name">打卡成功</span>
+          </figcaption>
+        </figure>
+        <figure class="tm2-phone" data-step="3" style="--i:2">
+          <div class="phone-shell" data-lb="teacher" data-lb-kind="phone" data-lb-src="proto/phone-3.jpg" data-lb-alt="教师小程序 · 等级图鉴 页面完整原型" data-lb-caption="等级图鉴 · 完整页面（可上下滚动，← → 切换）" role="button" aria-label="放大查看 等级图鉴 页面">
+            <span class="phone-shell__island" aria-hidden="true"></span>
+            <div class="phone-shell__screen">
+              <img src="proto/phone-3-thumb.jpg" alt="教师小程序 等级图鉴 页面" decoding="async">
+            </div>
+            <span class="phone-shell__home" aria-hidden="true"></span>
+          </div>
+          <figcaption>
+            <span class="tm2-phone__step">3 Step</span>
+            <span class="tm2-phone__name">等级图鉴</span>
+          </figcaption>
+        </figure>
+      </div>
+      <div class="tm2__side">
+        <h5 class="tm2__title">核心动线</h5>
+        <p class="tm2__desc">学员在小程序里的主路径是：完成一讲 → 立刻看到积分与阶位的变化 → 需要时打开图鉴确认自己的位置。三个页面各自承担这条路径上的一环。</p>
+        <div class="tm2-group" data-step="1" style="--i:0;--gi:0" tabindex="0">
+          <div class="tm2-group__h">
+            <span class="tm2-group__n">01</span>
+            <span class="tm2-group__t">打卡分享</span>
+            <span class="tm2-group__w">看完视频后弹出</span>
+          </div>
+          <div class="tm2-tags">
+            <span class="tm2-tag tm2-tag--solid" style="--i:0;--gi:0">积分反馈</span>
+            <span class="tm2-tag" style="--i:1;--gi:0">连续打卡</span>
+            <span class="tm2-tag tm2-tag--solid" style="--i:2;--gi:0">分享入口</span>
+          </div>
+        </div>
+        <div class="tm2-group" data-step="2" style="--i:1;--gi:1" tabindex="0">
+          <div class="tm2-group__h">
+            <span class="tm2-group__n">02</span>
+            <span class="tm2-group__t">打卡成功</span>
+            <span class="tm2-group__w">完成一讲后弹出</span>
+          </div>
+          <div class="tm2-tags">
+            <span class="tm2-tag tm2-tag--solid" style="--i:0;--gi:1">即时反馈</span>
+            <span class="tm2-tag" style="--i:1;--gi:1">积分变化</span>
+            <span class="tm2-tag tm2-tag--solid" style="--i:2;--gi:1">分享入口</span>
+          </div>
+        </div>
+        <div class="tm2-group" data-step="3" style="--i:2;--gi:2" tabindex="0">
+          <div class="tm2-group__h">
+            <span class="tm2-group__n">03</span>
+            <span class="tm2-group__t">等级图鉴</span>
+            <span class="tm2-group__w">从阶位处进入</span>
+          </div>
+          <div class="tm2-tags">
+            <span class="tm2-tag tm2-tag--solid" style="--i:0;--gi:2">四境十八阶</span>
+            <span class="tm2-tag" style="--i:1;--gi:2">当前位置</span>
+            <span class="tm2-tag tm2-tag--solid" style="--i:2;--gi:2">阶位门槛</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tm3-head">
+      <span class="tm3-head__n">02</span>
+      <svg class="tm3-head__rule" viewBox="0 0 36 6" fill="none" aria-hidden="true"><path d="M1 3c11-3 23 3 34 0" stroke="var(--pencil)" stroke-width="1.6" stroke-linecap="round" opacity=".35"/></svg>
+      <h4 class="tm3-head__t">后台支撑</h4>
+      <span class="tm3-head__s">积分来源可追溯，支持查询与导出</span>
+    </div>
+
+    <div class="tm3">
+      <div class="tm3__left">
+        <h5 class="tm3__title">积分数据的后台管理</h5>
+        <p class="tm3__desc">后台包含积分明细、用户档案与等级配置三个页面，支持按用户、时间与积分类型查询，结果可导出。运营通过这三个页面核对积分来源、处理异常并维护阶位规则。</p>
+        <div class="tm3-index">
+          <button class="tm3-idx is-on" type="button" style="--i:0" aria-current="true">
+            <span class="tm3-idx__n">01</span>
+            <span style="display:flex;flex-direction:column;gap:3px;text-align:left">
+              <span class="tm3-idx__t">用户积分明细</span>
+              <span class="tm3-idx__s">按用户、时间与积分类型查询，结果可导出</span>
+            </span>
+          </button>
+          <button class="tm3-idx" type="button" style="--i:1" aria-current="false">
+            <span class="tm3-idx__n">02</span>
+            <span style="display:flex;flex-direction:column;gap:3px;text-align:left">
+              <span class="tm3-idx__t">用户积分详情</span>
+              <span class="tm3-idx__s">单个用户的积分构成、当前阶位与打卡记录</span>
+            </span>
+          </button>
+          <button class="tm3-idx" type="button" style="--i:2" aria-current="false">
+            <span class="tm3-idx__n">03</span>
+            <span style="display:flex;flex-direction:column;gap:3px;text-align:left">
+              <span class="tm3-idx__t">等级图鉴配置</span>
+              <span class="tm3-idx__s">四境十六阶的积分区间、进阶提示语与人数</span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="tm3__right">
+        <div class="tm3-stack">
+          <div class="tm3-card" data-lb="admin" data-lb-src="proto/admin-1.jpg" data-lb-alt="教师小程序后台 · 用户积分明细" data-lb-caption="用户积分明细（← → 切换，Esc 关闭）" role="button" aria-label="放大查看 用户积分明细">
+            <div class="tm3-card__bar">
+              <span class="tm3-card__dot"></span>
+              <span class="tm3-card__dot"></span>
+              <span class="tm3-card__dot"></span>
+              <span class="tm3-card__name">积分管理 · 用户积分明细</span>
+            </div>
+            <div class="tm3-card__shot">
+              <img src="proto/admin-1-thumb.jpg" alt="用户积分明细 后台页面" decoding="async">
+            </div>
+          </div>
+          <div class="tm3-card" data-lb="admin" data-lb-src="proto/admin-2.jpg" data-lb-alt="教师小程序后台 · 用户积分详情" data-lb-caption="用户积分详情（← → 切换，Esc 关闭）" role="button" aria-label="放大查看 用户积分详情">
+            <div class="tm3-card__bar">
+              <span class="tm3-card__dot"></span>
+              <span class="tm3-card__dot"></span>
+              <span class="tm3-card__dot"></span>
+              <span class="tm3-card__name">积分管理 · 用户详情</span>
+            </div>
+            <div class="tm3-card__shot">
+              <img src="proto/admin-2-thumb.jpg" alt="用户积分详情 后台页面" decoding="async">
+            </div>
+          </div>
+          <div class="tm3-card" data-lb="admin" data-lb-src="proto/admin-3.jpg" data-lb-alt="教师小程序后台 · 等级图鉴配置" data-lb-caption="等级图鉴配置（← → 切换，Esc 关闭）" role="button" aria-label="放大查看 等级图鉴配置">
+            <div class="tm3-card__bar">
+              <span class="tm3-card__dot"></span>
+              <span class="tm3-card__dot"></span>
+              <span class="tm3-card__dot"></span>
+              <span class="tm3-card__name">积分管理 · 积分等级</span>
+            </div>
+            <div class="tm3-card__shot">
+              <img src="proto/admin-3-thumb.jpg" alt="等级图鉴配置 后台页面" decoding="async">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wd" id="work-flow" data-index="3" style="--wd-c:#8B5CF6">
+  <div class="wd__inner">
+    <div class="wd__head">
+      <div class="wd__head-l">
+        <h3 class="wd__title">AI 内容生产工作流</h3>
+        <p class="wd__sub">公众号图文与数字人口播视频两条生产线 · 把原本靠人反复重复的流程拆开，沉淀成 AI 能自己跑完的可复用工作流</p>
+      </div>
+    </div>
+    <svg class="wd__divider" viewBox="0 -4 1200 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/></svg>
+    <div class="fl-sec">
+      <div class="fl-sec__head"><span class="fl-sec__bar"></span><h4 class="fl-sec__title">线 A · 公众号图文</h4></div>
+      <span class="fl-lab">解决的问题</span>
+      <div class="fl-pains">
+        <div class="fl-pain" style="--i:0">
+          <div class="fl-pain__h"><span class="fl-pain__n">01</span><span class="fl-pain__t">产出质量不稳定</span></div>
+          <p class="fl-pain__d">写作法则与违禁词库固化在规则文档，不同作者按同一标准产出</p>
+        </div>
+        <div class="fl-pain" style="--i:1">
+          <div class="fl-pain__h"><span class="fl-pain__n">02</span><span class="fl-pain__t">从零起草，产量受限</span></div>
+          <p class="fl-pain__d">工作流批量产出符合规范的初稿，人工在初稿上修改而非从零撰写</p>
+        </div>
+        <div class="fl-pain" style="--i:2">
+          <div class="fl-pain__h"><span class="fl-pain__n">03</span><span class="fl-pain__t">风格标准难以传递</span></div>
+          <p class="fl-pain__d">风格与合规要求固化为文档，新人接手可直接按同一标准产出</p>
+        </div>
+      </div>
+      <div class="fl-wave" data-flow>
+        <div class="fl-wave__lines" aria-hidden="true">
+          <svg viewBox="0 0 1200 70" preserveAspectRatio="none" fill="none">
+            <path class="fl-wave__a" d="M-300 35c100-27 200 27 300 0 100-27 200 27 300 0 100-27 200 27 300 0 100-27 200 27 300 0 100-27 200 27 300 0 100-27 200 27 300 0" stroke="var(--orange)" stroke-width="2.2" opacity=".55"/>
+            <path class="fl-wave__b" d="M-300 40c100 26 200-28 300 0 100 26 200-28 300 0 100 26 200-28 300 0 100 26 200-28 300 0 100 26 200-28 300 0 100 26 200-28 300 0" stroke="var(--pencil)" stroke-width="1.6" opacity=".25"/>
+          </svg>
+        </div>
+        <div class="fl-step">
+          <span class="fl-tick" style="left:10.0000%;top:119px;height:16px" aria-hidden="true"></span>
+          <button class="fl-node" type="button" style="left:10.0000%;top:156px" aria-label="第 1 步 需求与调研">01</button>
+          <div class="fl-box" style="left:10.0000%;top:12px">
+            <span class="fl-box__t">需求与调研</span>
+            <p class="fl-box__d">追问到底：写给哪个号、给谁看、要达到什么。再抓竞品语料、拆解爆款方法论</p>
+          </div>
+        </div>
+        <div class="fl-step">
+          <span class="fl-tick" style="left:30.0000%;top:179px;height:16px" aria-hidden="true"></span>
+          <button class="fl-node" type="button" style="left:30.0000%;top:156px" aria-label="第 2 步 选题与大纲">02</button>
+          <div class="fl-box" style="left:30.0000%;top:197px">
+            <span class="fl-box__t">选题与大纲</span>
+            <p class="fl-box__d">确认选题六要素，搭出大标题、小标题、论点和配图位；选题不成立就不进写作</p>
+          </div>
+        </div>
+        <div class="fl-step">
+          <span class="fl-tick" style="left:50.0000%;top:119px;height:16px" aria-hidden="true"></span>
+          <button class="fl-node" type="button" style="left:50.0000%;top:156px" aria-label="第 3 步 写作与排版">03</button>
+          <div class="fl-box" style="left:50.0000%;top:12px">
+            <span class="fl-box__t">写作与排版</span>
+            <p class="fl-box__d">对照写作法则和违禁词库写正文，再按选定版式套版成可粘贴的 HTML</p>
+          </div>
+        </div>
+        <div class="fl-step">
+          <span class="fl-tick" style="left:70.0000%;top:179px;height:16px" aria-hidden="true"></span>
+          <button class="fl-node" type="button" style="left:70.0000%;top:156px" aria-label="第 4 步 配图与去味">04</button>
+          <div class="fl-box" style="left:70.0000%;top:197px">
+            <span class="fl-box__t">配图与去味</span>
+            <p class="fl-box__d">按配图位逐张生成插图，正文过去 AI 味处理，评分不达标不放行</p>
+          </div>
+        </div>
+        <div class="fl-step">
+          <span class="fl-tick" style="left:90.0000%;top:119px;height:16px" aria-hidden="true"></span>
+          <button class="fl-node" type="button" style="left:90.0000%;top:156px" aria-label="第 5 步 审核与发布">05</button>
+          <div class="fl-box" style="left:90.0000%;top:12px">
+            <span class="fl-box__t">审核与发布</span>
+            <p class="fl-box__d">两阶段内容审查，发布前脚本终检字数、敏感词、配图齐不齐，全过才发</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fl-sec fl-sec--alt">
+      <div class="fl-sec__head"><span class="fl-sec__bar"></span><h4 class="fl-sec__title">线 B · 数字人口播视频</h4></div>
+      <span class="fl-lab">解决的问题</span>
+      <div class="fl-pains">
+        <div class="fl-pain" style="--i:0">
+          <div class="fl-pain__h"><span class="fl-pain__n">01</span><span class="fl-pain__t">多个 IP 的人设易混淆</span></div>
+          <p class="fl-pain__d">三位老师各自一套源资料与人设配置，读哪套写哪套，从目录上隔离</p>
+        </div>
+        <div class="fl-pain" style="--i:1">
+          <div class="fl-pain__h"><span class="fl-pain__n">02</span><span class="fl-pain__t">选题调研占用大量人力</span></div>
+          <p class="fl-pain__d">多平台初筛由工作流完成，人工只确认候选，选题取自已验证的爆款</p>
+        </div>
+        <div class="fl-pain" style="--i:2">
+          <div class="fl-pain__h"><span class="fl-pain__n">03</span><span class="fl-pain__t">脚本起草缺少参考起点</span></div>
+          <p class="fl-pain__d">基于确认的选题方向生成口播稿初稿，人工修改即可，撰写时间大幅缩短</p>
+        </div>
+      </div>
+      <div class="fl-orbit" data-flow>
+        <svg class="fl-orbit__track" viewBox="0 0 1200 324" preserveAspectRatio="none" aria-hidden="true">
+          <ellipse class="fl-orbit__ring" cx="600" cy="120" rx="520" ry="95"/>
+          <ellipse class="fl-orbit__ring-in" cx="600" cy="120" rx="482" ry="76"/>
+        </svg>
+        <div class="fl-core">
+          <div class="fl-core__screen"><svg viewBox="0 0 22 24" aria-hidden="true"><path d="M2 2l18 10-18 10z"/></svg></div>
+          <span class="fl-core__stand"></span>
+          <span class="fl-core__base"></span>
+          <span class="fl-core__label">final.mp4</span>
+        </div>
+        <div class="fl-step">
+          <button class="fl-node" type="button" style="left:8.0000%;top:143.4px" aria-label="第 1 步 定人与规格">01</button>
+          <div class="fl-box" style="left:8.0000%;top:173.4px">
+            <span class="fl-box__t">定人与规格</span>
+            <p class="fl-box__d">确认目标老师、读该老师源资料、定视频规格；没读源资料不许往下走</p>
+          </div>
+        </div>
+        <div class="fl-step">
+          <button class="fl-node" type="button" style="left:25.0000%;top:197.6px" aria-label="第 2 步 抓爆款 · 定选题">02</button>
+          <div class="fl-box" style="left:25.0000%;top:227.6px">
+            <span class="fl-box__t">抓爆款 · 定选题</span>
+            <p class="fl-box__d">三平台搜同属性内容 → 人工确认候选 → 合规下载 → 只提炼选题方向，不抄原文</p>
+          </div>
+        </div>
+        <div class="fl-step">
+          <button class="fl-node" type="button" style="left:50.0000%;top:215px" aria-label="第 3 步 写口播稿">03</button>
+          <div class="fl-box" style="left:50.0000%;top:245px">
+            <span class="fl-box__t">写口播稿</span>
+            <p class="fl-box__d">对照老师源资料、写作前置规则和道家知识库写稿，去味后人工审核</p>
+          </div>
+        </div>
+        <div class="fl-step">
+          <button class="fl-node" type="button" style="left:75.0000%;top:197.6px" aria-label="第 4 步 合成声音与形象">04</button>
+          <div class="fl-box" style="left:75.0000%;top:227.6px">
+            <span class="fl-box__t">合成声音与形象</span>
+            <p class="fl-box__d">MiniMax 合成语音 → HeyGen 生成口播素材 → 字幕包装剪辑成片</p>
+          </div>
+        </div>
+        <div class="fl-step">
+          <button class="fl-node" type="button" style="left:92.0000%;top:143.4px" aria-label="第 5 步 三平台分发">05</button>
+          <div class="fl-box" style="left:92.0000%;top:173.4px">
+            <span class="fl-box__t">三平台分发</span>
+            <p class="fl-box__d">视频号、抖音、快手三平台，发布前终检，用户确认后才执行</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fl-sec fl-base">
+      <div class="fl-sec__head"><span class="fl-sec__bar"></span><h4 class="fl-sec__title">底层架构</h4></div>
+      <p class="fl-base__sub">两条线各有一套独立配置，结构相同。</p>
+      <span class="fl-lab">五层结构</span>
+      <div class="fl-layers">
+        <div class="fl-layer" style="--i:0">
+          <span class="fl-layer__t">主控</span>
+          <span class="fl-layer__d">AGENTS.md</span>
+        </div>
+        <svg class="fl-arrow" style="--i:0" viewBox="0 0 32 10" fill="none" aria-hidden="true"><path d="M6 5h16m-4-3.5l4 3.5-4 3.5" pathLength="1"/></svg>
+        <div class="fl-layer" style="--i:1">
+          <span class="fl-layer__t">能力模块</span>
+          <span class="fl-layer__d">SKILL.md</span>
+        </div>
+        <svg class="fl-arrow" style="--i:1" viewBox="0 0 32 10" fill="none" aria-hidden="true"><path d="M6 5h16m-4-3.5l4 3.5-4 3.5" pathLength="1"/></svg>
+        <div class="fl-layer" style="--i:2">
+          <span class="fl-layer__t">子 Agent</span>
+          <span class="fl-layer__d">审查 · 进化</span>
+        </div>
+        <svg class="fl-arrow" style="--i:2" viewBox="0 0 32 10" fill="none" aria-hidden="true"><path d="M6 5h16m-4-3.5l4 3.5-4 3.5" pathLength="1"/></svg>
+        <div class="fl-layer" style="--i:3">
+          <span class="fl-layer__t">事件钩子</span>
+          <span class="fl-layer__d">固定触发点</span>
+        </div>
+        <svg class="fl-arrow" style="--i:3" viewBox="0 0 32 10" fill="none" aria-hidden="true"><path d="M6 5h16m-4-3.5l4 3.5-4 3.5" pathLength="1"/></svg>
+        <div class="fl-layer" style="--i:4">
+          <span class="fl-layer__t">硬门槛</span>
+          <span class="fl-layer__d">校验脚本</span>
+        </div>
+      </div>
+      <p class="fl-base__note">敏感词、字数、配图完整性等有明确判定标准的检查，由最底两层的脚本执行，不写入提示词。</p>
+      <div class="fl-evo">
+        <svg class="fl-evo__svg" viewBox="0 0 1200 408" fill="none" aria-hidden="true">
+          <path class="fl-evo__track" d="M160 104h880a100 100 0 0 1 0 200H160a100 100 0 0 1 0-200z"/>
+          <g class="fl-evo__arrow" transform="translate(450 98)"><path d="M0 0l10 6-10 6z"/></g>
+          <g class="fl-evo__arrow" transform="translate(750 98)"><path d="M0 0l10 6-10 6z"/></g>
+          <g class="fl-evo__arrow" transform="translate(1134 199)"><path d="M0 0l12 5-12 5z"/></g>
+          <g class="fl-evo__arrow" transform="translate(750 298)"><path d="M10 0l-10 6 10 6z"/></g>
+          <g class="fl-evo__arrow" transform="translate(450 298)"><path d="M10 0l-10 6 10 6z"/></g>
+          <g class="fl-evo__arrow" transform="translate(54 199)"><path d="M12 0l-12 5 12 5z"/></g>
+          <g class="fl-evo__runner">
+            <circle class="fl-evo__halo" r="11"/>
+            <circle class="fl-evo__dot" r="5"/>
+          </g>
+        </svg>
+        <div class="fl-evo__core" style="left:35.8333%;top:37.0098%;width:28.3333%;height:18.3824%"><span>自进化信号</span></div>
+        <div class="fl-evo__node" style="left:25.0000%;top:27.8761%">01</div>
+        <div class="fl-evo__text fl-evo__text--first" style="left:12.9167%;top:0.0000%;width:24.1667%">
+          <span class="fl-evo__t">对话中的一次纠正</span>
+          <p class="fl-evo__d">以自然语言提出的修改意见，无需单独编辑规则文档</p>
+        </div>
+        <div class="fl-evo__node" style="left:50.0000%;top:27.8761%">02</div>
+        <div class="fl-evo__text" style="left:37.9167%;top:0.0000%;width:24.1667%">
+          <span class="fl-evo__t">钩子捕获信号</span>
+          <p class="fl-evo__d">UserPromptSubmit 钩子在每次提交时检测输入，识别其为修正意见而非新任务</p>
+        </div>
+        <div class="fl-evo__node" style="left:75.0000%;top:27.8761%">03</div>
+        <div class="fl-evo__text" style="left:62.9167%;top:0.0000%;width:24.1667%">
+          <span class="fl-evo__t">写入 signals.jsonl</span>
+          <p class="fl-evo__d">即时写入信号队列，不中断当前任务，无需人工事后记录</p>
+        </div>
+        <div class="fl-evo__node" style="left:75.0000%;top:72.1239%">04</div>
+        <div class="fl-evo__text" style="left:62.9167%;top:81.4159%;width:24.1667%">
+          <span class="fl-evo__t">下次会话时消化</span>
+          <p class="fl-evo__d">SessionStart 钩子检查队列，存在待处理信号时启动 evolution-runner 子 Agent</p>
+        </div>
+        <div class="fl-evo__node" style="left:50.0000%;top:72.1239%">05</div>
+        <div class="fl-evo__text" style="left:37.9167%;top:81.4159%;width:24.1667%">
+          <span class="fl-evo__t">人工逐条确认</span>
+          <p class="fl-evo__d">子 Agent 将信号归纳为具体的规则修改建议，由人工逐条批准或否决</p>
+        </div>
+        <div class="fl-evo__node" style="left:25.0000%;top:72.1239%">06</div>
+        <div class="fl-evo__text" style="left:12.9167%;top:81.4159%;width:24.1667%">
+          <span class="fl-evo__t">写回规则文档</span>
+          <p class="fl-evo__d">已批准的修改写入 AGENTS.md 或对应 SKILL.md，下次会话生效</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wd wd--alt" id="work-tags" data-index="4" style="--wd-c:#FF6B35">
+  <div class="wd__inner tg">
+    <div class="tg-hero">
+      <div class="tg-hero__l">
+        <h3 class="tg-hero__title" aria-label="用户行为标签识别系统">
+          <span class="tg-ch" style="--i:0" aria-hidden="true">用</span>
+          <span class="tg-ch" style="--i:1" aria-hidden="true">户</span>
+          <span class="tg-ch" style="--i:2" aria-hidden="true">行</span>
+          <span class="tg-ch" style="--i:3" aria-hidden="true">为</span>
+          <span class="tg-ch" style="--i:4" aria-hidden="true">标</span>
+          <span class="tg-ch" style="--i:5" aria-hidden="true">签</span>
+          <span class="tg-ch" style="--i:6" aria-hidden="true">识</span>
+          <span class="tg-ch" style="--i:7" aria-hidden="true">别</span>
+          <span class="tg-ch" style="--i:8" aria-hidden="true">系</span>
+          <span class="tg-ch" style="--i:9" aria-hidden="true">统</span>
+        </h3>
+        <p class="tg-hero__sub">把分散在聊天记录、订单、课程进度里的用户行为，转成一套结构化的标签体系。</p>
+      </div>
+      <div class="tg-hero__r">
+        <span class="tg-hero__lab">项目背景</span>
+        <p class="tg-hero__d">运营手上有大量用户，却只看得到零散的行为记录 —— 谁在群里说过什么、买过什么、学到第几课。需要一套统一的语言，把行为翻译成可查询、可筛选、可复用的标签。</p>
+      </div>
+    </div>
+    <svg class="wd__divider" viewBox="0 -4 1200 8" preserveAspectRatio="none" fill="none" aria-hidden="true"><path class="wave-flow" d="M-60 0q15-3 30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0t30 0" vector-effect="non-scaling-stroke"/></svg>
+    <div class="tg-body">
+      <div class="tg-body__l">
+        <span class="tg-lab">从行为到标签 · 五步</span>
+        <div class="tg-line">
+          <svg class="tg-line__svg" viewBox="0 0 16 250" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="tg-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4ECDC4"/>
+                <stop offset="25%" stop-color="#8FB8DD"/>
+                <stop offset="50%" stop-color="#C7A5FF"/>
+                <stop offset="75%" stop-color="#E896B8"/>
+                <stop offset="100%" stop-color="#FF8A5B"/>
+              </linearGradient>
+            </defs>
+            <path class="tg-line__spine" pathLength="1" d="M8 0V250"/>
+          </svg>
+          <div class="tg-step" style="--i:0;--tg-c:#4ECDC4">
+            <span class="tg-step__dot"></span>
+            <div class="tg-step__h">
+              <span class="tg-step__t">行为归集</span>
+              <span class="tg-step__out"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M0 4h8m-3-3l3 3-3 3"/></svg>原始行为池</span>
+            </div>
+            <p class="tg-step__d">社群聊天、订单、课程进度、直播互动汇总到一处</p>
+          </div>
+          <div class="tg-step" style="--i:1;--tg-c:#8FB8DD">
+            <span class="tg-step__dot"></span>
+            <div class="tg-step__h">
+              <span class="tg-step__t">信号定义</span>
+              <span class="tg-step__out"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M0 4h8m-3-3l3 3-3 3"/></svg>识别规则</span>
+            </div>
+            <p class="tg-step__d">明确什么话、什么动作算一次有效信号</p>
+          </div>
+          <div class="tg-step" style="--i:2;--tg-c:#C7A5FF">
+            <span class="tg-step__dot"></span>
+            <div class="tg-step__h">
+              <span class="tg-step__t">维度归类</span>
+              <span class="tg-step__out"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M0 4h8m-3-3l3 3-3 3"/></svg>标签体系</span>
+            </div>
+            <p class="tg-step__d">信号落进六大维度，确定层级与互斥关系</p>
+          </div>
+          <div class="tg-step" style="--i:3;--tg-c:#E896B8">
+            <span class="tg-step__dot"></span>
+            <div class="tg-step__h">
+              <span class="tg-step__t">打标校验</span>
+              <span class="tg-step__out"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M0 4h8m-3-3l3 3-3 3"/></svg>可信标签</span>
+            </div>
+            <p class="tg-step__d">自动打标后做去重、冲突检查与人工抽检</p>
+          </div>
+          <div class="tg-step" style="--i:4;--tg-c:#FF8A5B">
+            <span class="tg-step__dot"></span>
+            <div class="tg-step__h">
+              <span class="tg-step__t">运营应用</span>
+              <span class="tg-step__out"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M0 4h8m-3-3l3 3-3 3"/></svg>运营动作</span>
+            </div>
+            <p class="tg-step__d">分层触达、内容推荐、复购召回直接调用</p>
+          </div>
+        </div>
+      </div>
+      <div class="tg-body__r">
+        <span class="tg-lab">一条消息，六个标签</span>
+        <div class="tg-bubble">
+          <span class="tg-kw" style="--i:0;--tg-hl:rgba(199,165,255,.5)">我妈今年 62 了</span>
+          ，最近
+          <span class="tg-kw" style="--i:1;--tg-hl:rgba(232,150,184,.5)">老是失眠</span>
+          ，
+          <span class="tg-kw" style="--i:2;--tg-hl:rgba(232,150,184,.5)">睡不好还怕冷</span>
+          。之前在你们这
+          <span class="tg-kw" style="--i:3;--tg-hl:rgba(78,205,196,.45)">买过艾灸盒</span>
+          ，想问问
+          <span class="tg-kw" style="--i:4;--tg-hl:rgba(255,138,91,.45)">有没有适合她的课程</span>
+          ？
+        </div>
+        <div class="tg-maps">
+          <div class="tg-map">
+            <span class="tg-map__kw" style="--i:0">我妈今年 62 了</span>
+            <svg class="tg-map__arrow" style="--i:0" viewBox="0 0 14 8" aria-hidden="true"><path d="M0 4h11m-3.5-3.5L11 4l-3.5 3.5"/></svg>
+            <span class="tg-chip" style="--i:0;--chip-bg:#EFE9FC;--chip-fg:#6E4FD8">60岁以上(高龄)</span>
+          </div>
+          <div class="tg-map">
+            <span class="tg-map__kw" style="--i:1">老是失眠</span>
+            <svg class="tg-map__arrow" style="--i:1" viewBox="0 0 14 8" aria-hidden="true"><path d="M0 4h11m-3.5-3.5L11 4l-3.5 3.5"/></svg>
+            <span class="tg-chip" style="--i:1;--chip-bg:#FBE7EC;--chip-fg:#C9527A">睡眠专项</span>
+          </div>
+          <div class="tg-map">
+            <span class="tg-map__kw" style="--i:2">睡不好还怕冷</span>
+            <svg class="tg-map__arrow" style="--i:2" viewBox="0 0 14 8" aria-hidden="true"><path d="M0 4h11m-3.5-3.5L11 4l-3.5 3.5"/></svg>
+            <span class="tg-chip" style="--i:2;--chip-bg:#FBE7EC;--chip-fg:#C9527A">脾胃虚寒</span>
+          </div>
+          <div class="tg-map">
+            <span class="tg-map__kw" style="--i:3">买过艾灸盒</span>
+            <svg class="tg-map__arrow" style="--i:3" viewBox="0 0 14 8" aria-hidden="true"><path d="M0 4h11m-3.5-3.5L11 4l-3.5 3.5"/></svg>
+            <span class="tg-chip" style="--i:3;--chip-bg:#E2F2EC;--chip-fg:#3E8F72">艾灸外治党</span>
+            <span class="tg-chip" style="--i:4;--chip-bg:#FBEADF;--chip-fg:#C4622F">已购·复购潜力</span>
+          </div>
+          <div class="tg-map">
+            <span class="tg-map__kw" style="--i:5">有没有适合的课程</span>
+            <svg class="tg-map__arrow" style="--i:5" viewBox="0 0 14 8" aria-hidden="true"><path d="M0 4h11m-3.5-3.5L11 4l-3.5 3.5"/></svg>
+            <span class="tg-chip" style="--i:5;--chip-bg:#FBEADF;--chip-fg:#C4622F">高意向·准购买</span>
+          </div>
+        </div>
+        <p class="tg-note">标签分属健康痛点 / 消费意向 / 情感需求 / 养生方法 / 国学文化 / 人群画像<span class="tg-num" data-count="6">6</span> 个维度，共 <span class="tg-num" data-count="32">32</span> 个，颜色对应维度。</p>
+      </div>
+    </div>
+    <div class="tg-bar">
+      <svg class="tg-bar__icon" viewBox="0 0 52 62" aria-hidden="true">
+        <path d="M1 1h31l19 19v41H1z"/>
+        <path d="M32 1v19h19"/>
+        <text class="tg-bar__ext" x="9" y="46">HTML</text>
+      </svg>
+      <div class="tg-bar__info">
+        <span class="tg-bar__name">标签管理后台原型</span>
+        <p class="tg-bar__d">完整的标签管理后台原型 —— 展开维度、增删识别信号、编辑标签都能真的点。已实现有赞用户 / 标签管理 / 商品 / 直播四个 tab，单文件零依赖，点开直接在新标签页里用，不用下载。数据已脱敏，建议电脑端查看。</p>
+      </div>
+      <a class="tg-btn" href="prototypes/tag-system.html" target="_blank" rel="noopener">在新标签页打开<svg viewBox="0 0 13 13" aria-hidden="true"><path d="M4 1h8v8M12 1L3 10M9 12H1V4"/></svg></a>
+    </div>
+  </div>
+</section>
+<!-- ============================================================
+     05 · 联系方式 Contact
+     ============================================================ -->
+<section class="contact" id="contact" data-section="contact">
+  <div class="ct-doodles" aria-hidden="true">
+    <svg class="doodle doodle--float" style="left:8.3%;top:29.4%;--dur:5.4s;--delay:-2.2s" width="32" height="32" viewBox="-2 -2 36 36" fill="none"><path d="M16 0c1 12 4 15 16 16-12 1-15 4-16 16-1-12-4-15-16-16 12-1 15-4 16-16z" fill="var(--yellow)" opacity=".75"/></svg>
+    <svg class="doodle doodle--float" style="left:88.1%;top:27.2%;--dur:6.1s;--delay:-4.5s" width="34" height="30" viewBox="-2 -2 38 34" fill="none"><path d="M17 29c-14-10-17-18-14-23 5-6 12-3 14 2 2-5 9-8 14-2 3 5 0 13-14 23z" fill="var(--pink)" opacity=".75"/></svg>
+    <svg class="doodle doodle--float" style="left:9.3%;top:70.6%;--dur:4.8s;--delay:-1.4s" width="44" height="36" viewBox="-2 -2 48 40" fill="none"><path d="M2 14l40-12-16 32-6-13z m0 0l17 7" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".45"/></svg>
+    <svg class="doodle doodle--float" style="left:86.1%;top:65%;--dur:5.7s;--delay:-3.1s" width="110" height="36" viewBox="-2 -2 114 40" fill="none"><path d="M0 18q14-18 28 0t28 0 28 0 24 0" stroke="var(--pencil)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"/></svg>
+  </div>
+  <div class="contact__inner">
+    <div class="contact__center">
+      <svg class="ct-mascot" width="132" height="150" viewBox="-4 -4 132 150" fill="none" aria-hidden="true">
+        <path d="M32 42a28 28 0 1 0 56 0 28 28 0 1 0-56 0m21-25q3-14 13-6m-16 39q10 10 20 0m-10 20l0 32m0-22l-26 10m26 12l-14 30m14-30l14 30" stroke="var(--pencil)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+        <path class="ct-mascot__arm" d="M60 78l28-24" stroke="var(--pencil)" stroke-width="2.6" stroke-linecap="round"/>
+        <ellipse cx="46.5" cy="48" rx="6.5" ry="4" fill="var(--pink)" opacity=".5"/>
+        <ellipse cx="73.5" cy="48" rx="6.5" ry="4" fill="var(--pink)" opacity=".5"/>
+        <ellipse class="mascot__eye" cx="50" cy="38" rx="4" ry="4" fill="var(--pencil)"/>
+        <ellipse class="mascot__eye" cx="70" cy="38" rx="4" ry="4" fill="var(--pencil)"/>
+        <g class="ct-mascot__wave" transform="translate(86 34)" stroke="var(--yellow)" stroke-width="2.2" stroke-linecap="round">
+          <path d="M2 18q6-6 4-14"/>
+          <path d="M8 20q8-7 7-17"/>
+          <path d="M11 23q9-7 9-17"/>
+        </g>
+      </svg>
+      <h2 class="ct-title" aria-label="Say Hello!">
+        <span style="--i:0;color:var(--pencil)" aria-hidden="true">S</span>
+        <span style="--i:1;color:var(--pencil)" aria-hidden="true">a</span>
+        <span style="--i:2;color:var(--pencil)" aria-hidden="true">y</span>
+        <span style="--i:3;color:var(--pencil)" aria-hidden="true">&nbsp;</span>
+        <span style="--i:4;color:var(--orange)" aria-hidden="true">H</span>
+        <span style="--i:5;color:var(--yellow)" aria-hidden="true">e</span>
+        <span style="--i:6;color:var(--teal)" aria-hidden="true">l</span>
+        <span style="--i:7;color:var(--pink)" aria-hidden="true">l</span>
+        <span style="--i:8;color:var(--purple)" aria-hidden="true">o</span>
+        <span style="--i:9;color:var(--orange)" aria-hidden="true">!</span>
+      </h2>
+      <svg class="ct-rule" viewBox="0 -6 300 12" fill="none" aria-hidden="true"><path d="M0 3q37-7 75 0t75 0 75-1 73 1" pathLength="1"/></svg>
+      <p class="ct-cn">打个招呼</p>
+      <p class="ct-lead">正在寻找 2026 届产品岗位。如果你觉得我们可以聊聊，随时来找我。</p>
+    </div>
+    <div class="ct-cards">
+      <button class="ct-card" type="button" style="--i:0;--act-c:var(--orange)" data-copy="201985837@qq.com" aria-label="点击复制邮箱 201985837@qq.com">
+        <span class="ct-card__h"><span class="ct-card__k">EMAIL</span><span class="ct-card__act">点击复制</span></span>
+        <span class="ct-card__v">201985837@qq.com</span>
+      </button>
+      <button class="ct-card" type="button" style="--i:1;--act-c:var(--teal)" data-phone data-head="191" data-tail="7293" aria-label="点击显示完整手机号">
+        <span class="ct-card__h"><span class="ct-card__k">PHONE</span><span class="ct-card__act">点击显示</span></span>
+        <span class="ct-card__v">191 **** 7293</span>
+      </button>
+      <div class="ct-card ct-card--static" style="--i:2;--act-c:var(--purple)">
+        <span class="ct-card__h"><span class="ct-card__k">LOCATION</span><span class="ct-card__act">欢迎面聊</span></span>
+        <span class="ct-card__v">四川 · 成都</span>
+      </div>
+    </div>
+    <div class="ct-resume">
+      <!-- ============================================================
+           简历暂未开放下载。新版简历准备好之后，把下面整个
+           <span> 换回这一行就恢复了（同时把 PDF 放回 site/files/）：
+
+           <a class="ct-btn" href="files/resume.pdf" download="王子涵-产品经理-简历.pdf">
+             <svg viewBox="-2 -2 23 23" aria-hidden="true"><path d="M9.5 0l0 13m-5.5-5l5.5 5 5.5-5m-15 9l19 0"/></svg>
+             下载我的简历
+           </a>
+           ============================================================ -->
+      <span class="ct-btn ct-btn--soon">
+        <svg viewBox="-2 -2 23 23" aria-hidden="true"><path d="M9.5 1a8.5 8.5 0 1 0 0 17 8.5 8.5 0 1 0 0-17m0 4l0 4.5 3.5 2.5"/></svg>
+        简历整理中
+      </span>
+    </div>
+    <svg class="ct-footer-rule" viewBox="0 -2 1440 4" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M0 0l1440 0"/></svg>
+    <footer class="ct-footer">
+      <svg class="ct-mini" width="44" height="36" viewBox="-2 -2 44 36" fill="none" role="img" aria-label="一个正在打哈欠的小人">
+        <g class="ct-mini__body">
+          <path d="M9 11a10 10 0 1 0 20 0 10 10 0 1 0-20 0m5 3q5 4 10 0m-5 7l0 7m0-5l-8 4m8-4l8 4m-8 1l-6 6m6-6l6 6" stroke="var(--pencil)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+          <ellipse class="ct-mini__eye" cx="15" cy="9" rx="1.6" ry="1.6" fill="var(--pencil)"/>
+          <ellipse class="ct-mini__eye" cx="23" cy="9" rx="1.6" ry="1.6" fill="var(--pencil)"/>
+        </g>
+      </svg>
+      <span class="ct-footer__line ct-footer__line--small">© 2026 王子涵 · 保持好奇，继续画下去</span>
+    </footer>
+  </div>
+</section>
+</main>
+
+<style>
+/* 临时占位样式，第 2 批接入真实内容后整段删除 */
+.stub {
+  position: relative; z-index: 1;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+}
+.stub p {
+  font-family: var(--font-hand); font-size: 34px; color: var(--pencil);
+  opacity: .3; display: flex; align-items: baseline; gap: 14px;
+}
+.stub span { font-family: var(--font-body); font-size: 15px; opacity: .7; }
+</style>
+
+<script src="js/title-write.js"></script>
+<script src="js/cursor.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/section-title.js"></script>
+<script src="js/about.js"></script>
+<script src="js/electric-border.js"></script>
+<script src="js/depth-carousel.js"></script>
+<script src="js/modal-flip.js"></script>
+<script src="js/work-carousel.js"></script>
+<script src="js/work-detail.js"></script>
+<script src="js/video-player.js"></script>
+<script src="js/flow-steps.js"></script>
+<script src="js/evo-loop.js"></script>
+<script src="js/count-up.js"></script>
+<script src="js/contact.js"></script>
+<script src="js/bili-flow.js"></script>
+<script src="js/pair-focus.js"></script>
+<script src="js/step-focus.js"></script>
+<script src="js/card-stack.js"></script>
+<script src="js/lightbox.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

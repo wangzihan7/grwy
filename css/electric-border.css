@@ -1,0 +1,115 @@
+/* ============================================================
+   electric-border.css — 15 · 边框是一圈电流 / 16 · 电流在边框上流动
+   ------------------------------------------------------------
+   圆角矩形的轮廓每一点都被一张缓慢向上滚动的湍流噪声图推开 ±5px，
+   所以画面静止时边框也是活的。线本身白心彩边，外裹两层同色辉光。
+
+   三个关键实现点：
+
+   1. 位移滤镜挂在 .eb__field（三条线的共同父层），不是每条线各挂一次。
+      CSS filter 逐元素计算，挂三次就是三次 feTurbulence 运算 ×4 张卡 = 12 次。
+      提到父层后位移只算一次，各线的 blur 留在内层，效果完全一样。
+
+   2. CSS 渲染顺序是 filter → mask。描边形状由内层的 mask 切出来，
+      位移在外层，这样被推歪的是轮廓本身。反过来挂的话 filter 推的是
+      整块渐变、轮廓仍是死的圆角。
+
+   3. 圆角用 CSS border-radius 而非 SVG rect 的 rx —— 设计稿四张卡是
+      不对称手绘框（24/8/22/8 这种），rx 做不出来。
+
+   每张卡在自己的 style 上给出：
+     --eb-a / --eb-b   双色渐变（硕士紫粉 / 本科青绿 / 黄裳粉紫 / 白鲸橘黄）
+     --eb-soft         内侧底光，同色 8% alpha
+     --eb-filter       自己那份 feTurbulence，seed 不同所以形态不会撞
+   ============================================================ */
+
+.eb { position: relative; }
+
+/* 位移场：整圈电流线在这一层被噪声推歪 */
+.eb__field {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  filter: var(--eb-filter);
+}
+
+.eb__line {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  padding: 2px;                  /* = 线宽 */
+  /* 双色渐变沿边框缓慢平移 */
+  background: linear-gradient(180deg,
+    var(--eb-a) 0%,
+    var(--eb-b) 35%,
+    var(--eb-a) 70%,
+    var(--eb-b) 100%);
+  background-size: 100% 260%;
+  animation: ebFlow 4.5s linear infinite;
+  /* 只留描边：整块减去内容区，剩下 2px 的一圈 */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+}
+
+@keyframes ebFlow {
+  from { background-position: 0 0; }
+  to   { background-position: 0 -260%; }
+}
+
+/* 白心：线身中间提亮，像通了电的霓虹管 */
+.eb__line--core {
+  background: linear-gradient(180deg,
+    var(--eb-a) 0%,
+    #fff 18%,
+    var(--eb-b) 38%,
+    #fff 58%,
+    var(--eb-a) 78%,
+    var(--eb-b) 100%);
+  background-size: 100% 260%;
+}
+
+/* 内层辉光：紧贴线身 */
+.eb__line--g1 { filter: blur(3px); }
+/* 外层辉光：大范围晕开 */
+.eb__line--g2 {
+  filter: blur(12px);
+  opacity: .55;
+  transition: filter .3s ease, opacity .3s ease;
+}
+
+/* 卡片内侧透出的一点同色底光 */
+.eb__bgglow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity .3s ease;
+  background:
+    radial-gradient(ellipse at 50% 0%,   var(--eb-soft), transparent 68%),
+    radial-gradient(ellipse at 50% 100%, var(--eb-soft), transparent 68%);
+}
+
+/* —— 17 · 卡片被拿起来 ——
+   上浮 6px、轻微歪 1 度，相邻两张旋转方向相反。
+   位移幅度（feDisplacementMap 的 scale）与噪声滚动速度由
+   electric-border.js 用 rAF 插值 —— scale 不是 CSS 属性，过渡不了。 */
+.eb-card {
+  transition: transform .3s ease;
+  will-change: transform;
+}
+.eb-card:hover       { transform: translateY(-6px) rotate(1deg); }
+.eb-card--flip:hover { transform: translateY(-6px) rotate(-1deg); }
+
+.eb-card:hover .eb__line--g2 { filter: blur(20px); opacity: .8; }
+.eb-card:hover .eb__bgglow   { opacity: 1.8; }
+
+@media (prefers-reduced-motion: reduce) {
+  .eb__line  { animation: none; }
+  .eb__field { filter: none; }
+  .eb-card:hover,
+  .eb-card--flip:hover { transform: none; }
+}

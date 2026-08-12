@@ -1,0 +1,342 @@
+/* ============================================================
+   work-tags.css — 05 · 用户行为标签识别系统
+   规格 1 一屏一条时间轴 / 2 标题落笔与数字滚动
+        3 渐变竖线画出来，五步跟着亮 / 4 一条消息拆成六个标签
+        5 下载条的微交互 / 6 减弱动效时的降级
+   ------------------------------------------------------------
+   这一屏整页同时在视野里，不能每段各自等滚动触发 —— 那会让下半屏
+   的东西在人已经看到之后才开始动，很假。所以整屏进视口时启动一条
+   统一的时间轴，四块按阅读顺序入场，全程约 2.6 秒。
+   ============================================================ */
+
+.tg { margin-top: 6px; }
+
+.tg-hero { display: flex; gap: 80px; align-items: flex-start; }
+.tg-hero__l { flex: 1 1 600px; min-width: 0; }
+.tg-hero__r { flex: 0 0 520px; }
+.tg-hero__title {
+  font-family: var(--font-body);
+  font-size: 42px; font-weight: 700; line-height: 1.3;
+  color: var(--pencil);
+  margin: 0 0 16px;
+}
+
+/* 2 · 标题按字浮现，像正在被写下来 */
+.tg-ch { display: inline-block; }
+.js-anim .wd:not(.is-in) .tg-ch { opacity: 0; transform: translateY(8px); }
+.js-anim .wd.is-in .tg-ch {
+  opacity: 1; transform: none;
+  transition: opacity .32s ease, transform .32s var(--ease-out-soft);
+  transition-delay: calc(var(--i, 0) * .04s);
+}
+
+.tg-hero__sub {
+  font-family: var(--font-body);
+  font-size: 16px; line-height: 1.85;
+  color: var(--pencil); opacity: .75;
+  margin: 0;
+}
+.tg-hero__lab {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 18px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+  margin-bottom: 10px;
+}
+.tg-hero__d {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.85;
+  color: var(--pencil); opacity: .75;
+  margin: 0;
+}
+.js-anim .wd:not(.is-in) .tg-hero__sub,
+.js-anim .wd:not(.is-in) .tg-hero__r { opacity: 0; transform: translateY(10px); }
+.js-anim .wd.is-in .tg-hero__sub {
+  opacity: .75; transform: none;
+  transition: opacity .4s ease, transform .4s var(--ease-out-soft);
+  transition-delay: .2s;
+}
+.js-anim .wd.is-in .tg-hero__r {
+  opacity: 1; transform: none;
+  transition: opacity .4s ease, transform .4s var(--ease-out-soft);
+  transition-delay: .35s;
+}
+
+.tg-lab {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil); opacity: .6;
+  margin-bottom: 14px;
+}
+
+.tg-body { display: flex; gap: 70px; align-items: flex-start; margin-top: 30px; }
+.tg-body__l { flex: 0 0 470px; }
+.tg-body__r { flex: 1 1 660px; min-width: 0; }
+
+
+/* —— 3 · 渐变竖线：画到哪一步，就带出那一步的颜色 —— */
+.tg-line { position: relative; padding-left: 34px; }
+.tg-line__svg {
+  position: absolute;
+  left: 0; top: 16px;
+  width: 16px; height: 250px;
+  overflow: visible;
+}
+.tg-line__spine { fill: none; stroke: url(#tg-grad); stroke-width: 2; stroke-linecap: round; }
+.js-anim .wd:not(.is-in) .tg-line__spine { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js-anim .wd.is-in .tg-line__spine {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset .9s linear .55s;
+}
+
+.tg-step { position: relative; min-height: 62px; }
+.tg-step__dot {
+  position: absolute;
+  left: -34px; top: 4px;
+  width: 13px; height: 13px;
+  border: 2.4px solid var(--tg-c);
+  border-radius: 50%;
+  background: var(--d-bg-alt);
+  /* 整条轴画完之后每 5 秒跑一趟：只在前 14% 提亮，其余时间保持暗态，
+     自然形成「跑一趟 + 停一拍」，不需要 JS 计时器 */
+  animation: tgPulse 5s ease-out infinite;
+  animation-delay: calc(1.5s + var(--i, 0) * .18s);
+}
+@keyframes tgPulse {
+   0%  { filter: drop-shadow(0 0 0 transparent); border-width: 2.4px; }
+   6%  { filter: drop-shadow(0 0 9px var(--tg-c)); border-width: 3px; }
+  14%  { filter: drop-shadow(0 0 0 transparent); border-width: 2.4px; }
+ 100%  { filter: drop-shadow(0 0 0 transparent); border-width: 2.4px; }
+}
+
+.tg-step__h { display: flex; align-items: center; gap: 12px; }
+.tg-step__t {
+  font-family: var(--font-body);
+  font-size: 18px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+}
+.tg-step__out {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.68;
+  color: var(--pencil); opacity: .62;
+}
+.tg-step__out svg {
+  width: 10px; height: 8px;
+  fill: none; stroke: var(--tg-c);
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+.tg-step__d {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.6;
+  color: var(--pencil); opacity: .72;
+  margin: 6px 0 0;
+}
+/* 笔尖经过哪一步，右边的步骤名和说明就向右滑入 */
+.js-anim .wd:not(.is-in) .tg-step__h,
+.js-anim .wd:not(.is-in) .tg-step__d { opacity: 0; transform: translateX(-12px); }
+.js-anim .wd.is-in .tg-step__h {
+  opacity: 1; transform: none;
+  transition: opacity .35s ease, transform .35s var(--ease-out-soft);
+  transition-delay: calc(.62s + var(--i, 0) * .17s);
+}
+.js-anim .wd.is-in .tg-step__d {
+  opacity: .72; transform: none;
+  transition: opacity .35s ease, transform .35s var(--ease-out-soft);
+  transition-delay: calc(.68s + var(--i, 0) * .17s);
+}
+
+
+/* —— 4 · 一条消息拆成六个标签 —— */
+.tg-bubble {
+  position: relative;
+  padding: 14px 16px;
+  background: var(--d-bg);
+  border-radius: 4px 14px 14px 14px;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 2;
+  color: var(--pencil);
+}
+.wd--alt .tg-bubble { background: var(--d-bg-alt); }
+.js-anim .wd:not(.is-in) .tg-bubble { opacity: 0; transform: translate(-14px, 10px) scale(.96); }
+.js-anim .wd.is-in .tg-bubble {
+  opacity: 1; transform: none;
+  transition: opacity .4s ease, transform .45s var(--ease-back);
+  transition-delay: 1.15s;
+}
+
+/* 气泡里的关键词被荧光笔从左往右逐个划亮 */
+.tg-kw { position: relative; padding: 1px 3px; }
+.tg-kw::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 10%; bottom: 6%;
+  width: 0;
+  background: var(--tg-hl);
+  border-radius: 2px;
+  z-index: -1;
+}
+.js-anim .wd.is-in .tg-kw::before {
+  width: 100%;
+  transition: width .35s ease-out;
+  transition-delay: calc(1.55s + var(--i, 0) * .25s);
+}
+
+.tg-maps { display: flex; flex-direction: column; gap: 9px; margin-top: 18px; }
+.tg-map { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tg-map__kw {
+  padding: 5px 11px;
+  background: var(--d-bg);
+  border-radius: 3px;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil);
+  white-space: nowrap;
+}
+.wd--alt .tg-map__kw { background: var(--d-bg-alt); }
+.tg-map__arrow {
+  width: 14px; height: 8px;
+  flex: 0 0 auto;
+  fill: none; stroke: var(--pencil);
+  stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round;
+}
+.tg-chip {
+  padding: 5px 11px;
+  border-radius: 3px;
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  white-space: nowrap;
+}
+/* 关键词划亮之后，标签从关键词那头滑出来落位，落地弹一下。
+   设计稿里词和签本来就在同一行（左词右签），水平滑入就够，
+   不必真去记录起止位置做 FLIP。 */
+.js-anim .wd:not(.is-in) .tg-chip { opacity: 0; transform: translateX(-60px) scale(.8); }
+.js-anim .wd.is-in .tg-chip {
+  opacity: 1; transform: none;
+  transition: opacity .3s ease, transform .55s cubic-bezier(.34, 1.45, .64, 1);
+  transition-delay: calc(1.9s + var(--i, 0) * .25s);
+}
+.js-anim .wd:not(.is-in) .tg-map__kw,
+.js-anim .wd:not(.is-in) .tg-map__arrow { opacity: 0; }
+.js-anim .wd.is-in .tg-map__kw {
+  opacity: 1;
+  transition: opacity .3s ease;
+  transition-delay: calc(1.75s + var(--i, 0) * .25s);
+}
+.js-anim .wd.is-in .tg-map__arrow {
+  opacity: .35;
+  transition: opacity .3s ease;
+  transition-delay: calc(1.75s + var(--i, 0) * .25s);
+}
+
+.tg-note {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.8;
+  color: var(--pencil); opacity: .68;
+  margin: 20px 0 0;
+}
+/* 等宽数字，滚动时宽度不会跳 */
+.tg-num { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+
+/* —— 5 · 下载条：全屏唯一的行动点，克制但明确 —— */
+.tg-bar {
+  display: flex; align-items: center; gap: 24px;
+  margin-top: 40px;
+  padding: 20px 22px;
+  background: var(--d-bg);
+  border: 1.4px solid rgba(90, 90, 90, .22);
+  border-radius: 16px 6px 15px 6px;
+  transition: border-color .25s ease-out, background-color .25s ease-out;
+}
+.wd--alt .tg-bar { background: var(--d-bg-alt); }
+.tg-bar:hover { border-color: rgba(90, 90, 90, .45); }
+
+.tg-bar__icon { flex: 0 0 auto; width: 52px; height: 62px; transition: transform .25s ease-out; }
+.tg-bar:hover .tg-bar__icon { transform: translateY(-2px); }
+.tg-bar__icon path {
+  fill: var(--d-bg-alt);
+  stroke: var(--pencil);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.wd--alt .tg-bar__icon path { fill: var(--d-bg); }
+.tg-bar__ext { font-family: var(--font-body); font-size: 15px; font-weight: 700; fill: var(--teal); stroke: none; }
+
+.tg-bar__info { flex: 1 1 auto; min-width: 0; }
+.tg-bar__name {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 19px; line-height: 1.45;
+  color: var(--pencil);
+  margin-bottom: 6px;
+}
+.tg-bar__d {
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.75;
+  color: var(--pencil); opacity: .72;
+  margin: 0;
+}
+
+.tg-btn {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 13px 20px;
+  background: var(--teal);
+  border: 0;
+  border-radius: 12px 5px 11px 5px;
+  box-shadow: 3px 4px 0 rgba(90, 90, 90, .25);
+  font-family: var(--font-body);
+  font-size: 15.5px; font-weight: 500; line-height: 1.68;
+  color: var(--ink-black, #1A1A1A);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform .25s ease-out, box-shadow .25s ease-out;
+}
+.tg-btn:hover { transform: translateY(-2px); box-shadow: 4px 6px 0 rgba(90, 90, 90, .35); }
+.tg-btn svg {
+  width: 13px; height: 13px;
+  fill: none; stroke: currentColor;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .25s ease-out;
+}
+/* 外链箭头向右上轻移 */
+.tg-btn:hover svg { transform: translate(2px, -2px); }
+
+.js-anim .wd:not(.is-in) .tg-bar { opacity: 0; transform: translateY(14px); }
+.js-anim .wd.is-in .tg-bar {
+  opacity: 1; transform: none;
+  transition: opacity .45s ease 2.2s, transform .45s var(--ease-out-soft) 2.2s,
+              border-color .25s ease-out, background-color .25s ease-out;
+}
+
+
+/* —— 6 · 减弱动效：全部改成整块淡入，内容一次到位 —— */
+@media (prefers-reduced-motion: reduce) {
+  .tg-step__dot { animation: none; }
+  .js-anim .wd.is-in .tg-ch,
+  .js-anim .wd.is-in .tg-hero__sub,
+  .js-anim .wd.is-in .tg-hero__r,
+  .js-anim .wd.is-in .tg-step__h,
+  .js-anim .wd.is-in .tg-step__d,
+  .js-anim .wd.is-in .tg-bubble,
+  .js-anim .wd.is-in .tg-chip,
+  .js-anim .wd.is-in .tg-map__kw,
+  .js-anim .wd.is-in .tg-bar {
+    transition: opacity .3s ease;
+    transform: none;
+    transition-delay: 0s;
+  }
+  .js-anim .wd.is-in .tg-kw::before { transition: none; width: 100%; }
+  .js-anim .wd.is-in .tg-line__spine { transition: none; stroke-dashoffset: 0; }
+}
+
+@media (max-width: 1080px) {
+  .tg-hero, .tg-body { flex-direction: column; gap: 30px; }
+  .tg-hero__r, .tg-body__l, .tg-body__r { flex: 1 1 auto; width: 100%; }
+  .tg-bar { flex-wrap: wrap; }
+}

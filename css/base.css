@@ -1,0 +1,181 @@
+/* ============================================================
+   base.css — 设计令牌 / 重置 / 纸质感 / 通用手绘元素
+   色值与字体全部取自 yuanxinggerenwangye.pen 的变量表
+   ============================================================ */
+
+:root {
+  /* —— 色板 —— */
+  --d-bg:        #F5F1E8;   /* 米色纸底 */
+  --d-bg-alt:    #FFFDF5;
+  --pencil:      #5A5A5A;   /* 铅笔灰，主描边色 */
+  --pencil-soft: rgba(90, 90, 90, .7);
+  --d-ink:       #3D5A80;   /* 副标题蓝墨 */
+  --orange:      #FF6B35;
+  --yellow:      #FFD23F;
+  --teal:        #4ECDC4;
+  --green:       #95E1D3;
+  --pink:        #FF85A2;
+  --purple:      #C7A5FF;
+
+  /* —— 字体 —— */
+  --font-marker: 'Permanent Marker', 'Kalam', cursive;
+  --font-hand:   'Kalam', 'Permanent Marker', cursive;
+  --font-body:   'Noto Sans', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+
+  /* —— 节奏 —— */
+  --nav-h: 90px;
+  --ease-out-soft: cubic-bezier(.4, 0, .2, 1);
+  --ease-back:     cubic-bezier(.34, 1.56, .64, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--d-bg);
+  color: var(--pencil);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* —— 12 · 纸的质感 ——
+   极淡圆点纹理，固定不随滚动移动，让米色底像真的纸 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, .03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* —— 09 · 框在轻轻动 ——
+   手绘框的圆角在四组不对称数值间缓慢循环，像纸框在呼吸。
+   基准值取自设计稿按钮的 cornerRadius，幅度控制在 ±6px 内，
+   保持"歪框"手感而不夸张。 */
+@keyframes frameBreatheL {   /* 左侧按钮：30 9 26 9 */
+   0%,100% { border-radius: 30px  9px 26px  9px; }
+  25%      { border-radius: 26px 12px 30px  7px; }
+  50%      { border-radius: 33px  7px 24px 12px; }
+  75%      { border-radius: 28px 11px 28px  8px; }
+}
+@keyframes frameBreatheR {   /* 右侧按钮：9 28 9 30 */
+   0%,100% { border-radius:  9px 28px  9px 30px; }
+  25%      { border-radius: 12px 24px 11px 27px; }
+  50%      { border-radius:  7px 32px  7px 33px; }
+  75%      { border-radius: 11px 27px 10px 28px; }
+}
+
+/* —— 10 · 铅笔跟着鼠标 ——
+   光标变成橘色小圆点，后面拖一串逐渐变小变淡的彩色残点。
+   仅在真正有鼠标的设备上启用。 */
+@media (hover: hover) and (pointer: fine) {
+  body.pencil-cursor,
+  body.pencil-cursor * { cursor: none; }
+}
+
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 8px; height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--orange);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.cursor-dot.on { opacity: 1; }
+
+.cursor-trail {
+  position: fixed;
+  top: 0; left: 0;
+  width: 6px; height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* —— 通用 —— */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* —— 减弱动效降级 ——
+   系统开启"减少动态效果"时，去掉所有循环动画与光标特效，
+   内容一次性呈现，不做入场。 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+
+  body.pencil-cursor,
+  body.pencil-cursor * { cursor: auto; }
+
+  .cursor-dot, .cursor-trail { display: none; }
+}
+
+
+/* ============================================================
+   页面上那些手绘波浪分隔线：横向缓慢流动 + 墨迹微抖。
+   路径左右各多画一个波长，位移量正好等于一个波长，
+   首尾重合所以看不出接缝。
+   ============================================================ */
+.wave-flow {
+  animation: waveDrift 16s linear infinite;
+}
+@keyframes waveDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(60px); }
+}
+
+/* 手绘波浪、3D 卡片这类装饰会故意画到板块之外，超出视口的部分本来就看不见，
+   却会把文档撑宽、逼出一条横向滚动条（改字号前就有 3px，内容区加宽后变成 52px）。
+   overflow-x: clip 就地裁掉：和 hidden 不同，它不会变成滚动容器，
+   也不影响纵向的 position: sticky。弹窗都在 section 之外，不受影响。 */
+section { overflow-x: clip; }
+
+/* 承载波浪的 svg 要裁掉多画出去的那两段 */
+.wd__divider,
+.about__divider { overflow: hidden; }
+
+/* 和板块标题下划线同一套墨迹抖动，全站的手绘线条是一致的 */
+.wd__divider path,
+.about__divider path { filter: url(#ink-wobble); }
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-flow { animation: none; }
+  .wd__divider path,
+  .about__divider path { filter: none; }
+}
+
+
+/* ============================================================
+   46 · 滚动条也是手绘的
+   ============================================================ */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--d-bg); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--orange), var(--pink) 55%, var(--purple));
+  border: 2px solid var(--d-bg);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover { filter: brightness(1.08); }
+/* Firefox 只认这两个属性，取渐变的中间色 */
+html { scrollbar-color: var(--pink) var(--d-bg); scrollbar-width: thin; }

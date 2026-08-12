@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>用户服务管理平台 · 标签原型</title>
+<style>
+:root{--blue:#2F88FF;--ink:#1F2329;--sub:#475569;--mut:#9AA0A6;--line:#EDEFF2;--bg:#F4F5F7;}
+*{box-sizing:border-box;}
+body{margin:0;font-family:"PingFang SC","Microsoft YaHei",Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);}
+.app{width:1440px;margin:0 auto;background:var(--bg);min-height:100vh;}
+.topbar{height:56px;background:var(--blue);display:flex;align-items:center;padding:0 20px;color:#fff;font-weight:700;font-size:18px;}
+.tabbar{height:44px;background:#fff;border-bottom:1px solid #EAECEF;display:flex;align-items:flex-end;gap:18px;padding:0 20px;}
+.tab{height:100%;display:flex;align-items:center;font-size:14px;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;padding:0 2px;}
+.tab.active{color:var(--blue);font-weight:600;border-bottom-color:var(--blue);}
+.wrap{padding:14px 24px;display:flex;flex-direction:column;gap:12px;}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;}
+.filter{display:flex;gap:10px;align-items:center;padding:14px 16px;}
+.inp{height:34px;border:1px solid #D9DEE5;border-radius:6px;padding:0 12px;font-size:13px;color:var(--ink);background:#fff;outline:none;}
+.inp::placeholder{color:var(--mut);}
+.sel{height:34px;border:1px solid #D9DEE5;border-radius:6px;padding:0 12px;font-size:13px;color:var(--sub);background:#fff;display:flex;align-items:center;gap:8px;cursor:pointer;justify-content:space-between;position:relative;}
+.btn{height:34px;border-radius:6px;padding:0 18px;font-size:14px;border:1px solid #D9DEE5;background:#fff;color:var(--sub);cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.btn.pri{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500;}
+.btn.danger{background:#E5484D;color:#fff;border-color:#E5484D;}
+.btn.sm{height:30px;padding:0 12px;font-size:13px;}
+.spacer{flex:1;}
+.count{padding:13px 16px;border-bottom:1px solid var(--line);font-size:13px;color:#6B7280;font-weight:500;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:#FAFBFC;border-bottom:1px solid var(--line);text-align:left;font-size:13px;color:#6B7280;font-weight:500;padding:11px 16px;white-space:nowrap;}
+tbody td{border-bottom:1px solid #F0F1F3;padding:14px 16px;font-size:14px;color:var(--ink);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+.muted{color:var(--mut);}
+.link{color:var(--blue);cursor:pointer;}
+.link.red{color:#E5484D;}
+.sep{color:#D9DEE5;margin:0 6px;}
+.ellip{max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--sub);font-size:13px;}
+.chip{display:inline-flex;align-items:center;gap:3px;border-radius:4px;padding:2px 7px;font-size:11px;margin:2px 4px 2px 0;white-space:nowrap;}
+.chip .lock{font-size:9px;}
+.chip .x{cursor:pointer;opacity:.7;font-size:10px;}
+.chip .x:hover{opacity:1;}
+.kw{display:inline-flex;align-items:center;gap:4px;background:#F1F3F5;color:#475569;border-radius:4px;padding:2px 8px;font-size:12px;margin:2px 4px 2px 0;}
+.kw .x{cursor:pointer;color:#9AA0A6;}
+.kw.add{background:#fff;border:1px dashed #C4CBD4;color:#6B7280;cursor:pointer;}
+/* dimension accordion (tag library) */
+.dimhd{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid #F2F3F5;cursor:pointer;}
+.dot{width:8px;height:8px;border-radius:50%;}
+.cv{width:14px;color:#6B7280;display:inline-block;transition:transform .15s;}
+.dimhd.exp .cv{transform:rotate(90deg);}
+.tagrow{display:flex;align-items:center;padding:12px 16px 12px 38px;border-bottom:1px solid #F4F5F6;}
+.tagrow .tn{width:240px;font-weight:500;}
+.tagrow .sg{flex:1;}
+.tagrow .op{width:120px;text-align:right;}
+/* mask + modal */
+.mask{position:fixed;inset:0;background:#0F172A80;display:none;align-items:center;justify-content:center;z-index:50;}
+.mask.open{display:flex;}
+.modal{background:#fff;border-radius:12px;box-shadow:0 10px 36px #1F232930;width:520px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal.sm{width:440px;}
+.modal.xs{width:400px;}
+.mhd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #EFF1F4;}
+.mhd h3{margin:0;font-size:16px;}
+.mhd .cl{cursor:pointer;color:#8A9099;font-size:18px;}
+.mbd{padding:16px 18px;display:flex;flex-direction:column;gap:14px;overflow:auto;}
+.mft{display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid #EFF1F4;}
+label.fld{font-size:13px;font-weight:500;color:var(--ink);display:block;margin-bottom:6px;}
+label.fld .req{color:#E5484D;}
+.fi{width:100%;height:36px;border:1px solid #D9DEE5;border-radius:6px;padding:0 12px;font-size:13px;outline:none;}
+.fa{width:100%;min-height:110px;border:1px solid #D9DEE5;border-radius:6px;padding:10px 12px;font-size:13px;outline:none;resize:vertical;font-family:inherit;line-height:1.6;}
+.ro{font-size:13px;color:#6B7280;}
+.ro b{color:var(--ink);font-weight:600;}
+.range{display:flex;align-items:center;gap:10px;}
+.range input{flex:1;}
+.drop{border:1px solid #CBD5E1;background:#FAFBFC;border-radius:8px;padding:22px;text-align:center;color:#475569;font-size:13px;cursor:pointer;}
+.drop .big{font-size:24px;color:#94A3B8;}
+.drop .sub{font-size:12px;color:#9AA0A6;margin-top:4px;}
+/* picker (accordion select) */
+.picker{border:1px solid #EDEFF2;border-radius:6px;max-height:200px;overflow:auto;}
+.pdim{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid #F2F3F5;cursor:pointer;}
+.pitem{display:flex;gap:14px;flex-wrap:wrap;padding:8px 12px 8px 34px;border-bottom:1px solid #F2F3F5;}
+.cb{display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;}
+.cb .box{width:15px;height:15px;border:1px solid #C4CBD4;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.cb.on .box{background:var(--blue);border-color:var(--blue);}
+.cb.lock{cursor:not-allowed;color:#9AA0A6;}
+.cb.lock .box{background:#CBD5E1;border-color:#CBD5E1;}
+.selrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:#8A9099;}
+.search{height:32px;border:1px solid #D9DEE5;border-radius:6px;padding:0 10px;font-size:12px;flex:1;outline:none;}
+.userrow{border-bottom:1px solid #F0F1F3;padding:12px 16px;}
+.urline{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--sub);}
+.urline .nm{font-weight:600;color:var(--ink);width:110px;}
+.urline .f{min-width:70px;}
+.tagline{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:8px;padding-left:24px;}
+.addtag{font-size:12px;color:var(--blue);cursor:pointer;border:1px dashed #B8D3F6;border-radius:4px;padding:2px 8px;}
+.dd{position:absolute;top:38px;left:0;width:340px;background:#fff;border:1px solid #EAECEF;border-radius:10px;box-shadow:0 8px 30px #1F232926;padding:14px;z-index:40;display:none;flex-direction:column;gap:10px;}
+.dd.open{display:flex;}
+.radio{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;}
+.radio .o{width:16px;height:16px;border-radius:50%;border:1px solid #C4CBD4;display:inline-flex;align-items:center;justify-content:center;}
+.radio.on .o{border-color:var(--blue);}
+.radio.on .o::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--blue);}
+.toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;}
+.empty{padding:80px;text-align:center;color:var(--mut);}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">用户服务管理平台</div>
+  <div class="tabbar" id="tabbar"></div>
+  <div id="pages"></div>
+</div>
+
+<!-- ===== 弹窗们 ===== -->
+<div class="mask" id="mask"><div id="modalHost"></div></div>
+
+<script>
+/* ============ 配色 / 数据 ============ */
+const dims=[
+ {code:'A',name:'健康痛点',c:'#DC2626',bg:'#FEE2E2',exp:true,tags:[
+   {name:'气血亏虚',sig:['失眠','健忘','没精神','心慌','手脚凉','气短','乏力']},
+   {name:'三高·心脑血管',sig:['血压高','血脂高','头晕','心脏不适']},
+   {name:'脾胃虚寒',sig:['胃痛','反酸','拉肚子','没胃口']},
+   {name:'肝郁·情志',sig:['爱生气','胸闷','叹气','烦躁']},
+   {name:'筋骨关节',sig:['膝盖痛','腰膝酸','颈椎','肩周']},
+   {name:'睡眠专项(失眠)',sig:['整夜睡不着','入睡难','多梦']},
+   {name:'女性专属',sig:['子宫肌瘤','乳腺','月经','更年期']},
+   {name:'湿气·痰湿',sig:['水肿','大便黏','舌苔厚']},
+   {name:'肝肾·头面',sig:['头晕','眼花','脱发','耳鸣']},
+   {name:'肥胖·三减',sig:['减肥','瘦不下来','控糖','控脂']},
+   {name:'肺·呼吸',sig:['咳嗽','痰多','气短','过敏']}]},
+ {code:'B',name:'消费意向',c:'#EA580C',bg:'#FFEDD5',exp:false,tags:[
+   {name:'高意向·准购买',sig:['怎么买','多少钱','在哪买']},
+   {name:'已购·复购潜力',sig:['上次买的','还想要','回购']},
+   {name:'价格敏感',sig:['太贵了','有优惠吗','便宜点']},
+   {name:'犹豫观望',sig:['再看看','考虑一下','对比']}]},
+ {code:'C',name:'情感需求',c:'#CA8A04',bg:'#FEF3C7',exp:false,tags:[
+   {name:'空巢孤独',sig:['独居','孤单','盼人聊']},
+   {name:'怕拖累子女·养老焦虑',sig:['怕病','怕晚年','养老']},
+   {name:'亲子关系困扰',sig:['被子女疏远','代沟']},
+   {name:'情绪疗愈·自我成长',sig:['重新养自己','疗愈']}]},
+ {code:'D',name:'养生方法',c:'#16A34A',bg:'#DCFCE7',exp:false,tags:[
+   {name:'经方·古中医党',sig:['倪海厦','经方','古中医']},
+   {name:'食疗药膳党',sig:['黄芪','山楂','药膳']},
+   {name:'艾灸外治党',sig:['艾灸','艾条','穴位']},
+   {name:'功法运动党',sig:['踮脚','八段锦','拉伸']},
+   {name:'节气顺时党',sig:['节气','时令','应季']}]},
+ {code:'E',name:'国学文化',c:'#2563EB',bg:'#DBEAFE',exp:false,tags:[
+   {name:'易经·八卦·命理',sig:['八卦','命理','占卜']},
+   {name:'黄帝内经·中医经典',sig:['黄帝内经','经典']},
+   {name:'道家·传统文化',sig:['道家','传统文化']}]},
+ {code:'F',name:'人群画像',c:'#7C3AED',bg:'#EDE9FE',exp:false,tags:[
+   {name:'50-59岁(主力)',sig:['年龄 50–59 岁']},
+   {name:'女性',sig:['性别=女']},
+   {name:'60岁以上(高龄)',sig:['年龄 ≥ 60 岁']},
+   {name:'退休在家',sig:['退休','在家']},
+   {name:'男性',sig:['性别=男']}]}
+];
+const dmap=()=>{const m={};dims.forEach(d=>m[d.code]=d);return m};
+function chipHTML(code,name,del){const d=dmap()[code];if(!d)return'';const lk=del?'':'<span class="lock">🔒</span>';const x=del?`<span class="x" onclick="${del}">✕</span>`:'';return `<span class="chip" style="background:${d.bg};color:${d.c}">${lk}${code}·${name}${x}</span>`}
+
+let yzUsers=[
+ {nick:'张三',ph:'186****3381',sex:'女',lv:'普通',score:120,buys:2,cs:'¥596.00',last:'2026/05/02',src:'有赞商城',reg:'2025/11/03',sys:[['A','气血亏虚'],['C','空巢孤独']],man:[['B','价格敏感']],ck:false},
+ {nick:'李四',ph:'139****6139',sex:'女',lv:'会员',score:880,buys:6,cs:'¥2,380.00',last:'2026/05/08',src:'直播间',reg:'2025/06/12',sys:[['A','脾胃虚寒']],man:[['F','60岁以上(高龄)']],ck:false},
+ {nick:'王五',ph:'136****2571',sex:'男',lv:'普通',score:60,buys:1,cs:'¥168.00',last:'2026/04/20',src:'有赞商城',reg:'2026/01/09',sys:[['A','三高·心脑血管']],man:[['D','食疗药膳党']],ck:false},
+ {nick:'赵六',ph:'136****2746',sex:'女',lv:'普通',score:0,buys:0,cs:'¥0.00',last:'',src:'公众号',reg:'2026/02/15',sys:[['A','睡眠专项(失眠)']],man:[],ck:false},
+ {nick:'孙七',ph:'132****9603',sex:'女',lv:'会员',score:1520,buys:9,cs:'¥4,120.00',last:'2026/05/09',src:'直播间',reg:'2024/12/01',sys:[['B','高意向·准购买']],man:[['C','亲子关系困扰']],ck:false},
+ {nick:'周八',ph:'137****3380',sex:'女',lv:'普通',score:210,buys:3,cs:'¥740.00',last:'2026/04/28',src:'有赞商城',reg:'2025/09/22',sys:[],man:[['C','情绪疗愈·自我成长']],ck:false},
+ {nick:'吴九',ph:'159****2749',sex:'女',lv:'会员',score:660,buys:5,cs:'¥1,980.00',last:'2026/05/06',src:'直播间',reg:'2025/03/18',sys:[['E','易经·八卦·命理']],man:[['F','退休在家']],ck:false},
+ {nick:'郑十',ph:'135****1187',sex:'男',lv:'普通',score:90,buys:2,cs:'¥338.00',last:'2026/04/15',src:'公众号',reg:'2026/03/02',sys:[['A','筋骨关节']],man:[],ck:false}
+];
+let goods=[
+ {name:'气血双补膏方·30日装',buyers:1284,orders:1402,amount:'¥417,796',intro:'阿胶＋黄芪＋当归古法熬制，30 日周期调理气血两虚，适合长期疲劳人群。'},
+ {name:'三高调理茶·礼盒',buyers:860,orders:920,amount:'¥154,560',intro:'山楂决明子配方，辅助调节血压血脂，无糖配方零负担。'},
+ {name:'艾灸套装·家用',buyers:540,orders:580,amount:'¥80,620',intro:'含艾条＋随身灸盒，温通经络祛湿散寒，家用便捷易上手。'},
+ {name:'安神助眠枕',buyers:320,orders:335,amount:'¥33,165',intro:'草本填充透气支撑，助眠安神，改善浅睡易醒。'},
+ {name:'新品·黄帝内经精读课',buyers:0,orders:0,amount:'¥0',intro:''}
+];
+let lives=[
+ {name:'养生专场·气血调理',start:'2026-05-10T20:00',end:'2026-05-10T22:00',up:'2026/05/09 18:20',views:3251,amount:'¥186,420',script:'各位家人晚上好，今天我们聊气血双补这件事。\n一、为什么会气血两虚：长期熬夜、思虑过度、饮食生冷……\n二、日常调理三步法：晨起温水、午后小憩、睡前泡脚……\n三、配合气血双补膏方，坚持 30 天形成周期……'},
+ {name:'三高防控公益直播',start:'2026-05-08T19:30',end:'2026-05-08T21:00',up:'2026/05/07 20:10',views:1820,amount:'¥98,560',script:'血压高、血脂高的朋友注意，今天讲三高的日常调理……'},
+ {name:'脾胃调理专题',start:'2026-05-06T20:00',end:'2026-05-06T21:30',up:'2026/05/05 15:40',views:2240,amount:'¥124,300',script:'脾胃虚寒怎么调，三步走……'},
+ {name:'情绪疗愈夜话',start:'2026-05-05T21:00',end:'2026-05-05T22:30',up:'2026/05/04 21:00',views:980,amount:'¥41,200',script:''},
+ {name:'国学养生·易经专场',start:'2026-05-03T19:00',end:'2026-05-03T20:30',up:'2026/05/02 09:30',views:1530,amount:'¥72,840',script:'易经与养生的关系……'}
+];
+
+const TABS=['全部用户','企微用户','小鹅通用户','有赞用户','聊天记录','有赞订单','小鹅通订单','课程学习进度','标签管理','商品','直播'];
+const PAGEMAP={'有赞用户':'youzan','标签管理':'tag','商品':'goods','直播':'live'};
+let curPage='tag';
+
+/* ============ Tab ============ */
+function renderTabs(){
+  document.getElementById('tabbar').innerHTML=TABS.map(t=>{
+    const pg=PAGEMAP[t];const act=pg&&pg===curPage?'active':'';
+    return `<div class="tab ${act}" onclick="switchTab('${t}')">${t}</div>`;
+  }).join('');
+}
+function switchTab(t){const pg=PAGEMAP[t];if(!pg){curPage='__none';renderTabsTitle(t);return;}curPage=pg;renderTabs();renderPage();}
+let noneTitle='';
+function renderTabsTitle(t){noneTitle=t;document.getElementById('tabbar').innerHTML=TABS.map(x=>`<div class="tab ${x===t?'active':''}" onclick="switchTab('${x}')">${x}</div>`).join('');document.getElementById('pages').innerHTML=`<div class="wrap"><div class="card"><div class="empty">「${t}」模块原型未覆盖（本原型聚焦 标签管理 / 有赞用户 / 商品 / 直播）</div></div></div>`;}
+
+function renderPage(){
+  renderTabs();
+  if(curPage==='tag')renderTag();
+  else if(curPage==='youzan')renderYouzan();
+  else if(curPage==='goods')renderGoods();
+  else if(curPage==='live')renderLive();
+}
+
+/* ============ 标签管理(标签库) ============ */
+function renderTag(){
+  const totalTags=dims.reduce((s,d)=>s+d.tags.length,0);
+  let body=dims.map((d,di)=>{
+    const head=`<div class="dimhd ${d.exp?'exp':''}" onclick="toggleDim(${di})">
+        <span class="cv">▶</span><span class="dot" style="background:${d.c}"></span>
+        <b style="font-size:13px">${d.code}·${d.name}</b><span class="muted" style="font-size:12px">(${d.tags.length})</span>
+        <span class="spacer"></span>
+        <span class="link" style="font-size:12px" onclick="event.stopPropagation();openTagEdit(${di},-1)">＋ 添加标签</span>
+      </div>`;
+    let rows='';
+    if(d.exp){rows=d.tags.map((t,ti)=>`
+      <div class="tagrow">
+        <div class="tn">${t.name}</div>
+        <div class="sg">${t.sig.map((s,si)=>`<span class="kw">${s}<span class="x" onclick="delSig(${di},${ti},${si})">✕</span></span>`).join('')}<span class="kw add" onclick="addSig(${di},${ti})">＋</span></div>
+        <div class="op"><span class="link" onclick="openTagEdit(${di},${ti})">编辑</span><span class="sep">|</span><span class="link red" onclick="askDelTag(${di},${ti})">删除</span></div>
+      </div>`).join('');}
+    return head+rows;
+  }).join('');
+  document.getElementById('pages').innerHTML=`
+   <div class="wrap">
+     <div class="card filter">
+       <input class="inp" style="width:240px" placeholder="🔍 搜索标签名 / 识别信号">
+       <button class="btn pri">查询</button><button class="btn">重置</button>
+       <span class="spacer"></span>
+       <button class="btn" onclick="openDimMgr()">维度管理</button>
+       <button class="btn pri" onclick="openTagEdit(0,-1)">＋ 新增标签</button>
+     </div>
+     <div class="card">
+       <div class="count">共 6 维度 · ${totalTags} 标签</div>
+       <div class="tagrow" style="background:#FAFBFC;padding:11px 16px;font-weight:500;color:#6B7280;font-size:13px;border-bottom:1px solid #EDEFF2">
+         <div class="tn">标签名称</div><div class="sg">识别信号</div><div class="op">操作</div>
+       </div>
+       ${body}
+     </div>
+   </div>`;
+}
+function toggleDim(i){dims[i].exp=!dims[i].exp;renderTag();}
+function delSig(di,ti,si){dims[di].tags[ti].sig.splice(si,1);renderTag();}
+function addSig(di,ti){const v=prompt('新增识别信号关键词');if(v){dims[di].tags[ti].sig.push(v);renderTag();}}
+function askDelTag(di,ti){const t=dims[di].tags[ti];openConfirm('删除标签',`确定删除标签「${t.name}」吗？`,'删除后该标签下的关联将一并解除。',()=>{dims[di].tags.splice(ti,1);renderTag();});}
+
+/* 新增/编辑标签弹窗 */
+function openTagEdit(di,ti){
+  const isNew=ti<0;const t=isNew?{name:'',sig:[]}:dims[di].tags[ti];teSig=t.sig.slice();
+  const opts=dims.map((d,i)=>`<option value="${i}" ${i===di?'selected':''}>${d.code}·${d.name}</option>`).join('');
+  showModal('sm',isNew?'新增标签':'编辑标签',`
+     <div><label class="fld">所属维度 <span class="req">＊</span></label>
+       <select class="fi" id="te_dim">${opts}</select></div>
+     <div><label class="fld">标签名称 <span class="req">＊</span></label>
+       <input class="fi" id="te_name" value="${t.name}" placeholder="请输入标签名称"></div>
+     <div><label class="fld">识别信号</label>
+       <div class="fi" id="te_sig_box" style="height:auto;min-height:36px;padding:5px 8px;display:flex;flex-wrap:wrap;align-items:center;gap:2px"></div></div>
+  `,[{t:'取消'},{t:'保存',pri:1,fn:()=>{
+     const nd=+document.getElementById('te_dim').value;
+     const nm=document.getElementById('te_name').value.trim();if(!nm){alert('请输入标签名称');return false;}
+     const sg=teSig.slice();
+     if(isNew){dims[nd].tags.push({name:nm,sig:sg});dims[nd].exp=true;}
+     else{if(nd===di){dims[di].tags[ti]={name:nm,sig:sg};}else{dims[di].tags.splice(ti,1);dims[nd].tags.push({name:nm,sig:sg});dims[nd].exp=true;}}
+     renderTag();
+  }}]);
+  renderTeSig();
+}
+let teSig=[];
+function renderTeSig(){const box=document.getElementById('te_sig_box');if(!box)return;box.innerHTML=teSig.map((s,i)=>`<span class="kw">${s}<span class="x" onclick="delTeSig(${i})">✕</span></span>`).join('')+`<input id="te_sig_inp" class="search" style="width:140px;border:none;height:26px;flex:1;min-width:100px" placeholder="输入关键词后回车添加" onkeydown="teSigKey(event)">`;}
+function teSigKey(e){if(e.key==='Enter'){e.preventDefault();const v=e.target.value.trim();if(v){teSig.push(v);renderTeSig();const inp=document.getElementById('te_sig_inp');if(inp)inp.focus();}}}
+function delTeSig(i){teSig.splice(i,1);renderTeSig();const inp=document.getElementById('te_sig_inp');if(inp)inp.focus();}
+/* 维度管理弹窗 */
+function openDimMgr(){
+  const list=dims.map((d,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F2F3F5">
+     <span class="dot" style="background:${d.c}"></span>
+     <input class="fi" style="flex:1;height:32px" value="${d.code}·${d.name}" id="dm_${i}">
+     <span class="link red" onclick="rmDim(${i})">删除</span></div>`).join('');
+  showModal('sm','维度管理',`
+     <div style="max-height:220px;overflow:auto">${list}</div>
+     <div style="display:flex;gap:8px"><input class="fi" id="dm_new" placeholder="新增维度名称" style="flex:1"><button class="btn" onclick="addDim()">新增</button></div>
+  `,[{t:'取消'},{t:'保存',pri:1,fn:()=>{dims.forEach((d,i)=>{const v=document.getElementById('dm_'+i);if(v){const nm=v.value.split('·').pop();d.name=nm;}});renderTag();}}]);
+}
+function rmDim(i){if(confirm('删除该维度及其下所有标签？')){dims.splice(i,1);openDimMgr();}}
+function addDim(){const v=document.getElementById('dm_new').value.trim();if(!v)return;const code=String.fromCharCode(65+dims.length);const p=PALETTE[dims.length%PALETTE.length];dims.push({code,name:v,c:p.c,bg:p.bg,exp:false,tags:[]});openDimMgr();}
+const PALETTE=[{c:'#DC2626',bg:'#FEE2E2'},{c:'#EA580C',bg:'#FFEDD5'},{c:'#CA8A04',bg:'#FEF3C7'},{c:'#16A34A',bg:'#DCFCE7'},{c:'#2563EB',bg:'#DBEAFE'},{c:'#7C3AED',bg:'#EDE9FE'},{c:'#0891B2',bg:'#CFFAFE'},{c:'#DB2777',bg:'#FCE7F3'}];
+
+/* ============ 有赞用户 ============ */
+let yzMatch='any';
+let yzOnlyPaid=false;
+function renderYouzan(){
+  const rows=yzUsers.map((u,i)=>({u,i})).filter(o=>!yzOnlyPaid||o.u.last).map(({u,i})=>{
+    const sysC=u.sys.map(([c,n])=>chipHTML(c,n,null)).join('');
+    const manC=u.man.map(([c,n],mi)=>chipHTML(c,n,`delYzTag(${i},${mi})`)).join('');
+    return `<div class="userrow">
+      <div class="urline">
+        <label class="cb ${u.ck?'on':''}" onclick="toggleYz(${i})"><span class="box">${u.ck?'✓':''}</span></label>
+        <span class="nm">${u.nick}</span>
+        <span class="f">${u.ph}</span><span class="f">${u.sex}</span><span class="f">${u.lv}</span>
+        <span class="f">积分 ${u.score}</span><span class="f">购买 ${u.buys} 次</span><span class="f">${u.cs}</span>
+        <span class="f">${u.last||'—'}</span><span class="f">${u.src}</span><span class="f">${u.reg}</span>
+      </div>
+      <div class="tagline">🏷 ${sysC}${manC}<span class="addtag" onclick="openYzSingle(${i})">＋ 添加标签</span></div>
+    </div>`;
+  }).join('');
+  const ckCount=yzUsers.filter(u=>u.ck).length;
+  document.getElementById('pages').innerHTML=`
+   <div class="wrap">
+     <div class="card filter">
+       <input class="inp" style="width:150px" placeholder="姓名/昵称">
+       <input class="inp" style="width:150px" placeholder="手机号">
+       <input class="inp" style="width:90px" placeholder="等级">
+       <div class="sel" style="width:150px" onclick="toggleTagDD(event)">所属标签·全部 <span>▾</span>
+         <div class="dd" id="yzDD" onclick="event.stopPropagation()"></div>
+       </div>
+       <label class="cb ${yzOnlyPaid?'on':''}" style="font-size:13px;color:#475569" onclick="yzOnlyPaid=!yzOnlyPaid;renderYouzan()"><span class="box">${yzOnlyPaid?'✓':''}</span>仅看已消费用户</label>
+       <button class="btn pri">查询</button><button class="btn">重置</button>
+     </div>
+     <div class="card">
+       <div class="toolbar">
+         <div style="display:flex;gap:10px;align-items:center">
+           <button class="btn sm" onclick="toggleAllYz()">${yzUsers.length&&yzUsers.every(u=>u.ck)?'☑ 取消全选':'☐ 全选'}</button>
+           <button class="btn pri sm" onclick="openYzBatch()">＋ 批量打标签</button>
+         </div>
+         <span style="font-size:13px;color:#6B7280">共 ${yzUsers.length} 人 · 已选 <b style="color:var(--blue)">${ckCount}</b> 人 <span class="link" onclick="clearYzCk()">清除</span></span>
+       </div>
+       ${rows}
+     </div>
+   </div>`;
+}
+function toggleYz(i){yzUsers[i].ck=!yzUsers[i].ck;renderYouzan();}
+function clearYzCk(){yzUsers.forEach(u=>u.ck=false);renderYouzan();}
+function toggleAllYz(){const all=yzUsers.length&&yzUsers.every(u=>u.ck);yzUsers.forEach(u=>u.ck=!all);renderYouzan();}
+function delYzTag(i,mi){yzUsers[i].man.splice(mi,1);renderYouzan();}
+
+/* 所属标签 筛选下拉 */
+function toggleTagDD(e){e.stopPropagation();const dd=document.getElementById('yzDD');const open=dd.classList.contains('open');closeAllDD();if(!open){pickSel=[];pickLock=[];dd.classList.add('open');dd.innerHTML=filterDDHTML();}}
+function filterDDHTML(){
+  return `<div style="display:flex;align-items:center;gap:14px"><span style="font-size:12px;color:#6B7280">命中方式</span>
+     <span class="radio ${yzMatch==='any'?'on':''}" onclick="yzMatch='any';refreshDD()"><span class="o"></span>含任一</span>
+     <span class="radio ${yzMatch==='all'?'on':''}" onclick="yzMatch='all';refreshDD()"><span class="o"></span>同时含全部</span></div>
+   <input class="search" placeholder="🔍 搜索标签名…" oninput="pickFilter=this.value;refreshDD()">
+   <div id="pkWrap">${pickerHTML()}</div>
+   <div class="selrow" id="selWrap">${selHTML()}</div>
+   <div style="border-top:1px solid #F0F1F3"></div>
+   <div style="display:flex;justify-content:flex-end;gap:10px"><button class="btn sm" onclick="closeAllDD()">重置</button><button class="btn pri sm" onclick="closeAllDD()">确定</button></div>`;
+}
+function refreshDD(){const w=document.getElementById('yzDD');if(w&&w.classList.contains('open'))w.innerHTML=filterDDHTML();}
+function closeAllDD(){document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));}
+document.body.addEventListener('click',()=>closeAllDD());
+
+/* 单个用户加标签 */
+let yzSingleIdx=-1;
+function openYzSingle(i){yzSingleIdx=i;pickSel=[];pickLock=yzUsers[i].sys.slice();pickFilter='';openPickerModal('添加标签 · '+yzUsers[i].nick,()=>{
+   pickSel.forEach(([c,n])=>{const has=yzUsers[i].sys.some(s=>s[0]===c&&s[1]===n)||yzUsers[i].man.some(s=>s[0]===c&&s[1]===n);if(!has)yzUsers[i].man.push([c,n]);});renderYouzan();
+});}
+/* 批量打标签 */
+function openYzBatch(){pickSel=[];pickLock=[];pickFilter='';openPickerModal('批量打标签',()=>{
+   const targets=yzUsers.filter(u=>u.ck);
+   if(!targets.length){alert('请先在列表勾选用户');return false;}
+   targets.forEach(u=>pickSel.forEach(([c,n])=>{const has=u.sys.some(s=>s[0]===c&&s[1]===n)||u.man.some(s=>s[0]===c&&s[1]===n);if(!has)u.man.push([c,n]);}));
+   renderYouzan();
+});}
+
+/* ============ picker(accordion 选标签) 公共 ============ */
+let pickSel=[],pickLock=[],pickFilter='',pickExp={A:true};
+function pickerHTML(){
+  return `<div class="picker">`+dims.map(d=>{
+    const tags=d.tags.filter(t=>!pickFilter||t.name.includes(pickFilter));
+    if(pickFilter&&!tags.length)return'';
+    const exp=pickFilter?true:!!pickExp[d.code];
+    let items='';
+    if(exp){items=`<div class="pitem">`+tags.map(t=>{
+      const sel=pickSel.some(s=>s[0]===d.code&&s[1]===t.name);
+      const lock=pickLock.some(s=>s[0]===d.code&&s[1]===t.name);
+      if(lock)return `<span class="cb lock on"><span class="box">✓</span>${t.name}</span>`;
+      return `<span class="cb ${sel?'on':''}" onclick="togPick('${d.code}','${t.name}')"><span class="box">${sel?'✓':''}</span>${t.name}</span>`;
+    }).join('')+`</div>`;}
+    return `<div class="pdim" onclick="pickExp['${d.code}']=!(${exp});refreshPicker()"><span class="cv" style="${exp?'transform:rotate(90deg)':''}">▶</span><span class="dot" style="background:${d.c}"></span><b style="font-size:13px">${d.code}·${d.name}</b><span class="muted" style="font-size:12px">(${d.tags.length})</span></div>${items}`;
+  }).join('')+`</div>`;
+}
+function selHTML(){return '已选(手动)：'+(pickSel.length?pickSel.map(([c,n],i)=>chipHTML(c,n,`unPick(${i})`)).join(''):'<span class="muted">无</span>');}
+function togPick(c,n){const i=pickSel.findIndex(s=>s[0]===c&&s[1]===n);if(i>=0)pickSel.splice(i,1);else pickSel.push([c,n]);refreshPicker();refreshSel();}
+function unPick(i){pickSel.splice(i,1);refreshPicker();refreshSel();}
+function refreshPicker(){const el=document.getElementById('pkWrap');if(!el)return;const o=el.querySelector('.picker');const st=o?o.scrollTop:0;el.innerHTML=pickerHTML();const n=el.querySelector('.picker');if(n)n.scrollTop=st;}
+function refreshSel(){const s=document.getElementById('selWrap');if(s)s.innerHTML=selHTML();}
+function openPickerModal(title,onOk){
+  showModal('sm',title,`
+     <div><label class="fld">选择标签</label>
+       <div style="display:flex;gap:8px;margin-bottom:10px"><input class="search" placeholder="🔍 搜索标签名…" oninput="pickFilter=this.value;refreshPicker()"><div class="sel" style="width:130px">所属标签·全部 <span>▾</span></div></div>
+       <div id="pkWrap">${pickerHTML()}</div></div>
+     <div class="selrow" id="selWrap">${selHTML()}</div>
+  `,[{t:'取消'},{t:title==='批量打标签'?'确定 · 打标':'确定',pri:1,fn:onOk}]);
+}
+
+/* ============ 商品 ============ */
+function renderGoods(){
+  const rows=goods.map((g,i)=>`<tr>
+     <td style="font-weight:500">${g.name}</td>
+     <td>${g.buyers}</td><td>${g.orders}</td><td>${g.amount}</td>
+     <td><div class="ellip" title="${g.intro||''}">${g.intro||'<span class=muted>（未填写商品介绍）</span>'}</div></td>
+     <td><span class="link" onclick="openGoodsEdit(${i})">编辑</span><span class="sep">|</span><span class="link red" onclick="askDelGoods(${i})">删除</span></td>
+   </tr>`).join('');
+  document.getElementById('pages').innerHTML=`
+   <div class="wrap">
+     <div class="card filter">
+       <input class="inp" style="width:280px" placeholder="🔍 商品名称">
+       <button class="btn pri">查询</button><button class="btn">重置</button>
+       <span class="spacer"></span><button class="btn pri" onclick="openGoodsEdit(-1)">＋ 新增商品</button>
+     </div>
+     <div class="card">
+       <div class="count">共 ${goods.length} 个商品</div>
+       <table><thead><tr><th>商品名称</th><th>购买人数</th><th>购买订单数</th><th>销售总额</th><th>商品介绍</th><th>操作</th></tr></thead>
+       <tbody>${rows}</tbody></table>
+     </div>
+   </div>`;
+}
+function openGoodsEdit(i){
+  const isNew=i<0;const g=isNew?{name:'',intro:''}:goods[i];
+  showModal('sm',isNew?'新增商品':'编辑商品',`
+     <div><label class="fld">商品名称 <span class="req">＊</span></label><input class="fi" id="g_name" value="${g.name}" placeholder="请输入商品名称"></div>
+     <div><label class="fld">商品介绍</label><textarea class="fa" id="g_intro" placeholder="请输入商品介绍，用于列表展示…">${g.intro}</textarea></div>
+  `,[{t:'取消'},{t:'保存',pri:1,fn:()=>{const nm=document.getElementById('g_name').value.trim();if(!nm){alert('请输入商品名称');return false;}const it=document.getElementById('g_intro').value.trim();
+     if(isNew)goods.push({name:nm,buyers:0,orders:0,amount:'¥0',intro:it});else{g.name=nm;g.intro=it;}renderGoods();}}]);
+}
+function askDelGoods(i){openConfirm('删除商品',`确定删除商品「${goods[i].name}」吗？`,'删除后不可恢复。',()=>{goods.splice(i,1);renderGoods();});}
+
+/* ============ 直播 ============ */
+function fmt(dt){return dt.replace('T',' ').replace(/-/g,'/');}
+function renderLive(){
+  const rows=lives.map((l,i)=>`<tr>
+     <td style="font-weight:500">${l.name}</td>
+     <td>${fmt(l.start)} — ${fmt(l.end)}</td>
+     <td>${l.up}</td><td>${l.views}</td><td>${l.amount}</td>
+     <td><span class="link" onclick="openLiveEdit(${i})">编辑</span></td>
+   </tr>`).join('');
+  document.getElementById('pages').innerHTML=`
+   <div class="wrap">
+     <div class="card filter">
+       <input class="inp" style="width:200px" placeholder="直播名称">
+       <input class="inp" type="date" style="width:170px">
+       <button class="btn pri">查询</button><button class="btn">重置</button>
+       <span class="spacer"></span><button class="btn pri" onclick="openLiveNew()">＋ 新增直播</button>
+     </div>
+     <div class="card">
+       <div class="count">共 ${lives.length} 场</div>
+       <table><thead><tr><th>直播名称</th><th>直播时间</th><th>上传时间</th><th>观看人数</th><th>直播销售额</th><th>操作</th></tr></thead>
+       <tbody>${rows}</tbody></table>
+     </div>
+   </div>`;
+}
+/* 新增直播 */
+function openLiveNew(){
+  showModal('','新增直播',`
+     <div><label class="fld">直播名称 <span class="req">＊</span></label><input class="fi" id="l_name" placeholder="请输入直播名称"></div>
+     <div><label class="fld">直播时间 <span class="req">＊</span></label>
+       <div class="range"><input class="fi" type="datetime-local" id="l_start"><span class="muted">—</span><input class="fi" type="datetime-local" id="l_end"></div></div>
+     <div><label class="fld">观看数据（Excel 导入）</label>
+       <div class="drop" onclick="this.querySelector('input').click()"><div class="big">☁</div>点击上传 / 拖拽 .xlsx 文件到此<div class="sub">支持 .xlsx / .xls，导入后行数将作为本场观看人数</div><input type="file" accept=".xlsx,.xls" style="display:none"></div></div>
+  `,[{t:'取消'},{t:'保存',pri:1,fn:()=>{const nm=document.getElementById('l_name').value.trim();if(!nm){alert('请输入直播名称');return false;}const s=document.getElementById('l_start').value||'2026-05-11T20:00';const e=document.getElementById('l_end').value||'2026-05-11T22:00';
+     lives.unshift({name:nm,start:s,end:e,up:'—',views:0,amount:'¥0',script:''});renderLive();}}]);
+}
+/* 编辑直播(融合:详情+改稿) */
+function openLiveEdit(i){
+  const l=lives[i];
+  showModal('','编辑直播',`
+     <div class="ro">直播名称：<b>${l.name}</b></div>
+     <div><label class="fld">直播时间 <span class="req">＊</span></label>
+       <div class="range"><input class="fi" type="datetime-local" id="l_start" value="${l.start}"><span class="muted">—</span><input class="fi" type="datetime-local" id="l_end" value="${l.end}"></div></div>
+     <div class="ro">观看人数 <b>${l.views}</b> &nbsp;&nbsp; 上传时间 ${l.up}</div>
+     <div><label class="fld">直播稿内容</label><textarea class="fa" id="l_script" placeholder="请输入直播稿内容…">${l.script}</textarea></div>
+  `,[{t:'取消'},{t:'保存',pri:1,fn:()=>{l.start=document.getElementById('l_start').value||l.start;l.end=document.getElementById('l_end').value||l.end;l.script=document.getElementById('l_script').value;renderLive();}}]);
+}
+
+/* ============ 通用弹窗 ============ */
+function showModal(size,title,bodyHTML,btns){
+  const host=document.getElementById('modalHost');
+  const ft=btns.map((b,i)=>`<button class="btn ${b.pri?'pri':''} ${b.danger?'danger':''}" data-i="${i}">${b.t}</button>`).join('');
+  host.innerHTML=`<div class="modal ${size}"><div class="mhd"><h3>${title}</h3><span class="cl" onclick="closeModal()">✕</span></div><div class="mbd">${bodyHTML}</div><div class="mft">${ft}</div></div>`;
+  host.querySelectorAll('.mft .btn').forEach(el=>{el.onclick=()=>{const b=btns[+el.dataset.i];let r=true;if(b.fn)r=b.fn();if(r!==false)closeModal();};});
+  document.getElementById('mask').classList.add('open');
+}
+function openConfirm(title,t1,t2,onOk){
+  showModal('xs',title,`<div style="display:flex;gap:10px"><span style="color:#E5484D;font-size:20px">⚠</span><div><div style="font-weight:500;font-size:14px;line-height:1.6">${t1}</div><div class="muted" style="font-size:13px;margin-top:4px">${t2}</div></div></div>`,[{t:'取消'},{t:'确定删除',danger:1,fn:onOk}]);
+}
+function closeModal(){document.getElementById('mask').classList.remove('open');document.getElementById('modalHost').innerHTML='';}
+document.getElementById('mask').onclick=e=>{if(e.target.id==='mask')closeModal();};
+
+/* ============ init ============ */
+renderTabs();renderPage();
+</script>
+</body>
+</html>

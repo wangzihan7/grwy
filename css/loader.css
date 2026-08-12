@@ -1,0 +1,124 @@
+/* ============================================================
+   loader.css — 00 · 开屏 Loading
+   规格 01 小人边画边等 / 02 手绘进度条 / 03 揭幕
+   ============================================================ */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  background: var(--d-bg);
+  /* 03 · 揭幕：整层向上淡出，与 Hero 入场有 0.8s 重叠 */
+  transition: opacity .8s ease, transform .8s ease, visibility .8s;
+}
+
+.loader.is-done {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-40px);
+}
+
+/* 开屏也铺同样的纸纹，揭幕时才不会有底色断层 */
+.loader::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, .03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.loader__doodles { position: absolute; inset: 0; pointer-events: none; }
+.loader__doodles .doodle { position: absolute; }
+
+/* —— 01 · 小人边画边等 —— */
+.mascot { display: block; }
+
+/* 整体上下轻弹 15px */
+.mascot--bounce { animation: mascotBounce 3s ease-in-out infinite; }
+@keyframes mascotBounce {
+   0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-15px); }
+}
+
+/* 眼睛每 4 秒眨一次：95% 处竖向压扁到 10% 再弹回。
+   开屏和 Hero 的小人都眨。 */
+.mascot__eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 4s ease-in-out infinite;
+}
+@keyframes blink {
+   0%, 93%, 100% { transform: scaleY(1); }
+  95%            { transform: scaleY(.1); }
+}
+
+/* 手举铅笔在空中划出橘色轨迹，画完消失再重画 */
+.mascot__trail {
+  stroke-dasharray: var(--len, 60);
+  stroke-dashoffset: var(--len, 60);
+  animation: drawTrail 1.2s ease-in-out infinite;
+}
+@keyframes drawTrail {
+   0%      { stroke-dashoffset: var(--len, 60); opacity: 1; }
+  70%      { stroke-dashoffset: 0;              opacity: 1; }
+  85%,100% { stroke-dashoffset: 0;              opacity: 0; }
+}
+
+/* —— 02 · 手绘进度条 —— */
+.loader__label {
+  font-family: var(--font-body);
+  font-size: 28px;
+  line-height: 1.45;
+  color: var(--pencil);
+  margin: 0;
+}
+
+.loader__bar {
+  position: relative;
+  width: 220px;
+  height: 16px;
+  overflow: hidden;
+  border: 2.2px solid var(--pencil);
+  /* 歪框：四角不对称圆角，缓慢呼吸 */
+  border-radius: 9px 4px 9px 4px;
+  animation: barBreathe 8s ease-in-out infinite;
+}
+@keyframes barBreathe {
+   0%, 100% { border-radius:  9px 4px  9px 4px; }
+  33%       { border-radius:  6px 7px 11px 3px; }
+  66%       { border-radius: 11px 3px  7px 6px; }
+}
+
+.loader__fill {
+  height: 100%;
+  width: 0;
+  border-radius: 9px 4px 9px 4px;
+  background: linear-gradient(90deg,
+    var(--orange) 0%,
+    var(--yellow) 35%,
+    var(--teal)   70%,
+    var(--pink)   100%);
+}
+
+.loader__percent {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.68;
+  color: var(--pencil);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 开屏期间锁住滚动：这会儿滚下去，揭幕后就停在页面中间了 */
+body.is-loading { overflow: hidden; }
+
+/* 减弱动效时：不播开屏，直接进站 */
+@media (prefers-reduced-motion: reduce) {
+  .loader { display: none; }
+}

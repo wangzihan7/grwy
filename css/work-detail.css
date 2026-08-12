@@ -1,0 +1,1588 @@
+/* ============================================================
+   work-detail.css — 作品详情段落
+   ------------------------------------------------------------
+   通用骨架（标题行 / 分隔线 / 元信息 / 流程条）+ 各作品的专有块。
+   五件作品共用这套骨架，段落之间只换内容不换结构。
+   ============================================================ */
+
+.wd {
+  position: relative;
+  z-index: 1;
+  scroll-margin-top: 96px;   /* 吸顶导航会压住标题，留出偏移量 */
+  padding: 78px 24px 86px;
+  /* 相邻段落底色交替。原来这里没设背景，五段全透出 body 的同一个色，
+     .wd--alt 加了也看不出区别。 */
+  background: var(--d-bg-alt);
+  /* 段与段之间不画线，靠背景色交替和留白分隔 */
+}
+.wd--alt { background: var(--d-bg); }
+
+.wd__inner { max-width: 1300px; margin: 0 auto; }
+
+/* —— 标题行：左标题右元信息 —— */
+.wd__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 60px;
+}
+.wd__head-l { flex: 1 1 620px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+.wd__title {
+  font-family: var(--font-body);
+  font-size: 36px; font-weight: 700; line-height: 1.3;
+  color: var(--pencil);
+  margin: 0;
+}
+.wd__sub {
+  font-family: var(--font-body);
+  font-size: 16px; line-height: 1.85;
+  color: var(--pencil); opacity: .72;
+  margin: 0;
+  max-width: 620px;
+}
+
+.wd__meta { flex: 0 0 420px; display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+.wd__meta-row { display: flex; align-items: baseline; gap: 24px; }
+.wd__meta-k {
+  /* 26px 装不下两个 14px 的字，会竖排成「片/长」 */
+  flex: 0 0 32px;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.68;
+  color: var(--pencil); opacity: .4;
+}
+.wd__meta-v {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil); opacity: .78;
+}
+
+.wd__divider { display: block; width: 100%; height: 8px; margin: 26px 0 30px; }
+.wd__divider path { fill: none; stroke: var(--pencil); stroke-width: 1.8; opacity: .22; }
+
+/* —— 主体：左边大块，右边窄栏 —— */
+.wd__body { display: flex; gap: 30px; align-items: flex-start; }
+.wd__main { flex: 1 1 850px; min-width: 0; }
+.wd__side { flex: 0 0 320px; display: flex; flex-direction: column; gap: 12px; }
+.wd__side-lab {
+  font-family: var(--font-body);
+  font-size: 18px; line-height: 1.45;
+  color: var(--pencil);
+}
+
+
+/* ============================================================
+   01 · Vox 视频
+   规格 1 点了才播播完停住 / 2 播放按钮跟手 / 3 关键帧错峰淡入
+        4 底部流程从左往右点亮 / 5 窄屏与减弱动效
+   ============================================================ */
+
+.vox-player {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 850 / 478;
+  overflow: hidden;
+  border-radius: 20px 8px 18px 8px;
+  border: 1.6px solid var(--pencil);
+  box-shadow: 6px 8px 0 rgba(90, 90, 90, .16);
+  background: #1A1A1A;
+  cursor: pointer;
+}
+.vox-player video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 2 · 压暗层。常态 25%，鼠标进入播放器收到 15% —— 画面自己亮一下作为回应 */
+.vox-player__scrim {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: .25;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.vox-player:hover .vox-player__scrim { opacity: .15; }
+
+.vox-player__btn {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 84px; height: 84px;
+  margin: -42px 0 0 -42px;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; padding: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .9);
+  cursor: pointer;
+  /* hover 挂在播放器容器上而不是按钮本身，热区更大 */
+  transition: transform .25s ease, opacity .25s ease;
+}
+.vox-player:hover .vox-player__btn { transform: scale(1.08); background: #fff; }
+.vox-player__btn svg { width: 23px; height: 27px; margin-left: 4px; fill: #1A1A1A; }
+
+.vox-player__hint {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(50% + 60px);
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.6;
+  color: #fff; opacity: .72;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+
+/* 右下角一组：时长 + 全屏 */
+.vox-player__bar {
+  position: absolute;
+  right: 20px; bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  transition: opacity .25s ease;
+}
+.vox-player__dur {
+  padding: 5px 10px;
+  border-radius: 10px 4px 9px 4px;
+  background: rgba(0, 0, 0, .6);
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.55;
+  color: #fff;
+  pointer-events: none;
+}
+/* 播放器只有 820px 宽，后台演示里的表格字看不清，
+   给一个全屏入口。全屏时切到浏览器原生控件，进度、音量、
+   退出全屏都齐了，不用自己再造一套。 */
+.vox-player__fs {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px 4px 9px 4px;
+  background: rgba(0, 0, 0, .6);
+  cursor: pointer;
+  transition: background-color .2s ease, transform .2s ease;
+}
+.vox-player__fs:hover { background: rgba(0, 0, 0, .82); transform: scale(1.08); }
+.vox-player__fs svg { width: 15px; height: 15px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 全屏态：去掉纸片外观，视频完整显示不裁切 */
+.vox-player:fullscreen {
+  width: 100vw; height: 100vh;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: #000;
+  cursor: default;
+}
+.vox-player:fullscreen video { object-fit: contain; }
+/* 全屏下用原生控件，自绘的这套让位 */
+.vox-player:fullscreen .vox-player__scrim,
+.vox-player:fullscreen .vox-player__btn,
+.vox-player:fullscreen .vox-player__hint,
+.vox-player:fullscreen .vox-player__bar { display: none; }
+
+/* 1+2 · 播放中：按钮、提示、压暗一起淡出；鼠标移上去再淡回来，方便随时暂停 */
+.vox-player.is-playing { cursor: default; }
+.vox-player.is-playing .vox-player__btn,
+.vox-player.is-playing .vox-player__hint,
+.vox-player.is-playing .vox-player__bar { opacity: 0; pointer-events: none; }
+.vox-player.is-playing .vox-player__scrim { opacity: 0; }
+.vox-player.is-playing:hover .vox-player__btn,
+.vox-player.is-playing:hover .vox-player__bar { opacity: 1; pointer-events: auto; }
+.vox-player.is-playing:hover .vox-player__scrim { opacity: .18; }
+/* 播放中鼠标移上去，按钮换成暂停 */
+.vox-player.is-playing .vox-player__btn svg { margin-left: 0; }
+
+/* —— 3 · 关键帧 —— */
+.vox-shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.vox-shot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 154 / 87;
+  object-fit: cover;
+  border-radius: 12px 5px 11px 5px;
+  border: 1.2px solid rgba(90, 90, 90, .3);
+  transition: transform .22s ease, filter .22s ease, opacity .22s ease;
+}
+.js-anim .wd:not(.is-in) .vox-shot { opacity: 0; transform: translateY(8px); }
+/* 播放器落位之后，四张按 01→04 间隔 0.1s 依次淡入并上浮 */
+.js-anim .wd.is-in .vox-shot {
+  opacity: 1;
+  transform: none;
+  transition: opacity .42s ease, transform .42s var(--ease-out-soft), filter .22s ease;
+  transition-delay: calc(.34s + var(--i, 0) * .1s);
+}
+/* hover 任意一张：那张提亮放大，另外三张压暗 —— 一次只看一张 */
+.vox-shots:hover .vox-shot { opacity: .7; filter: brightness(.92); }
+.vox-shots .vox-shot:hover { opacity: 1; transform: scale(1.03); filter: brightness(1.06); }
+
+/* —— 4 · 底部流程从左往右点亮 —— */
+.wd-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+.wd-flow__lab {
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.62;
+  color: var(--pencil); opacity: .42;
+  margin-right: 4px;
+}
+.wd-flow__chip {
+  padding: 6px 12px;
+  border: 1.2px solid var(--pencil);
+  border-radius: 12px 5px 11px 5px;
+  background: var(--d-bg);
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.62;
+  color: var(--pencil);
+  white-space: nowrap;
+}
+.wd--alt .wd-flow__chip { background: var(--d-bg-alt); }
+.wd-flow__arrow { width: 13px; height: 9px; fill: none; stroke: var(--pencil); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: .32; }
+
+/* 只动 border-color 与 opacity，不动尺寸，避免整行东西跟着抖 */
+.js-anim .wd:not(.is-in) .wd-flow__chip { opacity: 0; border-color: transparent; }
+.js-anim .wd:not(.is-in) .wd-flow__arrow { opacity: 0; }
+.js-anim .wd.is-in .wd-flow__chip {
+  opacity: .75;
+  border-color: var(--pencil);
+  transition: opacity .3s ease, border-color .3s ease;
+  transition-delay: calc(.5s + var(--i, 0) * .12s);
+}
+.js-anim .wd.is-in .wd-flow__arrow {
+  opacity: .32;
+  transition: opacity .3s ease;
+  transition-delay: calc(.56s + var(--i, 0) * .12s);
+}
+
+/* —— 整段入场 —— */
+.js-anim .wd:not(.is-in) .wd__head,
+.js-anim .wd:not(.is-in) .wd__divider,
+.js-anim .wd:not(.is-in) .wd__body { opacity: 0; transform: translateY(16px); }
+.js-anim .wd.is-in .wd__head,
+.js-anim .wd.is-in .wd__divider,
+.js-anim .wd.is-in .wd__body {
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s ease, transform .5s var(--ease-out-soft);
+}
+.js-anim .wd.is-in .wd__divider { transition-delay: .1s; }
+.js-anim .wd.is-in .wd__body    { transition-delay: .16s; }
+
+/* —— 5 · 减弱动效：只保留整体淡入 —— */
+@media (prefers-reduced-motion: reduce) {
+  .js-anim .wd .vox-shot,
+  .js-anim .wd .wd-flow__chip,
+  .js-anim .wd .wd-flow__arrow { opacity: 1 !important; transform: none !important; transition-delay: 0s !important; }
+  .js-anim .wd:not(.is-in) .wd-flow__chip { border-color: var(--pencil); }
+}
+
+/* —— 5 · 窄屏 —— */
+@media (max-width: 980px) {
+  .wd__head { flex-direction: column; gap: 22px; }
+  .wd__body { flex-direction: column; }
+  .wd__side { flex: 1 1 auto; width: 100%; }
+  /* 关键帧从 2×2 变成横向可滑动的一条，播放器保持满宽 */
+  .vox-shots {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 6px;
+  }
+  .vox-shot { flex: 0 0 62%; scroll-snap-align: center; }
+  .vox-shots:hover .vox-shot { opacity: 1; filter: none; }
+}
+@media (max-width: 640px) {
+  .wd__title { font-size: 28px; }
+  .vox-player__btn { width: 64px; height: 64px; margin: -32px 0 0 -32px; }
+  .vox-player__btn svg { width: 18px; height: 21px; }
+}
+
+
+/* ============================================================
+   02 · AI 内容生产工作流
+   规格 48 波浪线一直在流动 / 49 五个环节自动依次点亮 / 50 鼠标移上去就接管
+        51 环形轨道用同一套规则 / 52 跑完一圈中间的成片亮一下
+   ============================================================ */
+
+.fl-sec { position: relative; padding: 46px 0 54px; }
+
+/* 线 B 那段底色与上下两段不同，要撑满整个视口宽度 */
+.fl-sec--alt::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: var(--d-bg);
+  z-index: -1;
+}
+
+.fl-sec__head { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; }
+.fl-sec__bar { width: 5px; height: 26px; background: var(--orange); flex: 0 0 auto; }
+.fl-sec__title {
+  font-family: var(--font-body);
+  font-size: 26px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+  margin: 0;
+}
+
+.fl-lab {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 700; line-height: 1.68;
+  color: var(--orange);
+  margin-bottom: 12px;
+}
+
+/* —— 解决的问题：三条并排 —— */
+.fl-pains { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; margin-bottom: 46px; }
+.fl-pain { display: flex; flex-direction: column; gap: 7px; }
+.fl-pain__h { display: flex; align-items: baseline; gap: 10px; }
+.fl-pain__n {
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: var(--orange);
+}
+.fl-pain__t {
+  font-family: var(--font-body);
+  font-size: 16.5px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil);
+}
+.fl-pain__d {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.75;
+  color: var(--pencil); opacity: .7;
+  margin: 0;
+}
+/* 55 · 三条问题按从左到右间隔 0.08s 依次淡入上移 */
+.js-anim .wd:not(.is-in) .fl-pain { opacity: 0; transform: translateY(12px); }
+.js-anim .wd.is-in .fl-pain {
+  opacity: 1; transform: none;
+  transition: opacity .4s cubic-bezier(.2,.8,.2,1), transform .4s cubic-bezier(.2,.8,.2,1);
+  transition-delay: calc(.2s + var(--i, 0) * .08s);
+}
+
+/* —— 48 · 波浪时间轴 —— */
+.fl-wave { position: relative; width: 100%; height: 308px; margin-bottom: 10px; }
+
+.fl-wave__lines { position: absolute; left: 0; top: 121px; width: 100%; height: 70px; overflow: hidden; }
+.fl-wave__lines svg { display: block; width: 100%; height: 100%; overflow: visible; }
+/* 路径左右各多画一个完整波长，位移量正好等于一个波长，接缝看不出来。
+   两条线速度不同，看上去才像水面在动而不是一整块在平移。 */
+.fl-wave__a, .fl-wave__b { animation: waveShift 12s linear infinite; }
+.fl-wave__b { animation-duration: 18s; }
+@keyframes waveShift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(300px); }
+}
+
+/* 节点与说明卡：位置用百分比，跟着容器宽度走 */
+.fl-node {
+  position: absolute;
+  width: 42px; height: 42px;
+  margin: -21px 0 0 -21px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.8px solid var(--orange);
+  border-radius: 50%;
+  background: var(--d-bg-alt);
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700;
+  color: var(--pencil);
+  cursor: pointer;
+  z-index: 2;
+  transition: transform .35s ease-out, background-color .35s ease-out, color .35s ease-out;
+}
+/* 49 · 亮起时放大到 1.15 并填充转实心 */
+.fl-node.is-on { transform: scale(1.15); background: var(--orange); color: #fff; }
+
+.fl-tick {
+  position: absolute;
+  width: 1.6px;
+  background: var(--orange);
+  opacity: .4;
+  z-index: 1;
+}
+
+.fl-box {
+  position: absolute;
+  width: 216px;
+  margin-left: -108px;
+  display: flex; flex-direction: column; gap: 5px;
+  text-align: center;
+  opacity: .45;
+  cursor: pointer;
+  transition: opacity .3s ease;
+}
+.fl-box.is-on { opacity: 1; }
+.fl-box__t {
+  font-family: var(--font-body);
+  font-size: 16.5px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil);
+  transition: color .3s ease;
+}
+.fl-box.is-on .fl-box__t { color: #C9471C; }
+.fl-box__d {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.65;
+  color: var(--pencil); opacity: .8;
+  margin: 0;
+}
+
+/* —— 51 · 环形轨道，同一套规则 —— */
+.fl-orbit { position: relative; width: 100%; height: 324px; margin-bottom: 40px; }
+.fl-orbit__track { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.fl-orbit__track ellipse { fill: none; }
+/* 轨道极缓慢地顺时针流动 */
+.fl-orbit__ring {
+  stroke: var(--orange);
+  stroke-width: 2;
+  opacity: .45;
+  stroke-dasharray: 14 10;
+  animation: orbitFlow 20s linear infinite;
+}
+@keyframes orbitFlow {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -240; }
+}
+.fl-orbit__ring-in { stroke: var(--pencil); stroke-width: 1.4; opacity: .16; }
+
+.fl-orbit .fl-node { width: 46px; height: 46px; margin: -23px 0 0 -23px; font-size: 16px; }
+.fl-orbit .fl-box { width: 180px; margin-left: -90px; }
+
+/* 中心那台成片播放器 */
+.fl-core {
+  position: absolute;
+  left: 50%; top: 30px;
+  width: 184px;
+  margin-left: -92px;
+  display: flex; flex-direction: column; align-items: center;
+  z-index: 3;
+  transition: transform .5s ease-out;
+}
+.fl-core__screen {
+  width: 88px; height: 60px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--d-bg-alt);
+  border: 1.6px solid var(--orange);
+  border-radius: 8px 3px 7px 3px;
+  transition: box-shadow .5s ease-out;
+}
+.fl-core__screen svg { width: 19px; height: 21px; margin-left: 3px; fill: none; stroke: var(--orange); stroke-width: 2; stroke-linejoin: round; }
+.fl-core__stand { width: 12px; height: 10px; background: var(--pencil); opacity: .4; }
+.fl-core__base {
+  width: 184px; height: 46px;
+  border-radius: 50%;
+  background: var(--d-bg);
+  border: 1.4px solid rgba(90, 90, 90, .2);
+  margin-top: -6px;
+}
+.fl-core__label {
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.55;
+  color: var(--pencil); opacity: .65;
+  margin-top: 8px;
+}
+/* 52 · 跑到第 05 步「分发」时，中间的成片亮一下 —— 这一圈真的产出了东西 */
+.fl-core.is-lit { transform: scale(1.04); }
+.fl-core.is-lit .fl-core__screen { box-shadow: 0 0 0 4px rgba(232, 163, 23, .18), 0 0 26px 6px rgba(232, 163, 23, .35); }
+
+/* —— 57 · 减少动态效果时的降级 —— */
+@media (prefers-reduced-motion: reduce) {
+  .fl-wave__a, .fl-wave__b, .fl-orbit__ring { animation: none; }
+  /* 所有节点直接呈现为点亮态，hover 仍然可用 */
+  .fl-node { transform: none; background: var(--orange); color: #fff; }
+  .fl-box { opacity: 1; }
+  .fl-core.is-lit { transform: none; }
+}
+
+/* —— 窄屏：横排的时间轴与环形轨道都改成竖排列表 —— */
+@media (max-width: 980px) {
+  .fl-pains { grid-template-columns: 1fr; gap: 22px; margin-bottom: 34px; }
+  .fl-wave, .fl-orbit { height: auto; display: flex; flex-direction: column; gap: 18px; }
+  .fl-wave__lines, .fl-orbit__track, .fl-tick, .fl-core { display: none; }
+  .fl-wave .fl-node, .fl-orbit .fl-node {
+    position: static; margin: 0; flex: 0 0 auto;
+  }
+  .fl-wave .fl-box, .fl-orbit .fl-box {
+    position: static; margin: 0; width: auto; text-align: left; opacity: 1;
+  }
+  .fl-step {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding-bottom: 18px;
+  }
+}
+
+
+/* ============================================================
+   02 · B 站智能内容分析系统
+   规格 1 点了才播 / 2 ★ 流程图自己在转 / 3 橙色只给纠错那条路
+        4 三段实现顺序进场 / 5 技术栈的小反馈 / 6 窄屏与减弱动效
+   ============================================================ */
+
+.bili-body { display: flex; gap: 24px; align-items: flex-start; }
+.bili-main { flex: 1 1 820px; min-width: 0; }
+.bili-side { flex: 0 0 460px; }
+
+/* —— 三段实现 —— */
+.bili-points { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 34px; }
+.bili-point { display: flex; flex-direction: column; gap: 5px; }
+.bili-point__h { display: flex; align-items: baseline; gap: 8px; }
+.bili-point__n {
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: var(--wd-c);
+}
+.bili-point__t {
+  font-family: var(--font-body);
+  font-size: 15.5px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil);
+}
+.bili-point__d {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.75;
+  color: var(--pencil); opacity: .72;
+  margin: 0;
+}
+/* 4 · 三段是一条链路上的三步，顺着读的方向从左到右出现 */
+.js-anim .wd:not(.is-in) .bili-point { opacity: 0; transform: translateY(12px); }
+.js-anim .wd.is-in .bili-point {
+  opacity: 1; transform: none;
+  transition: opacity .5s cubic-bezier(.2,.7,.3,1), transform .5s cubic-bezier(.2,.7,.3,1);
+  transition-delay: calc(.3s + var(--i, 0) * .12s);
+}
+
+/* —— 2 · LangGraph 流程图 —— */
+.bili-flow { position: relative; width: 100%; height: 512px; margin: 12px 0 6px; }
+.bili-flow__lines { position: absolute; left: 0; top: 0; width: 380px; height: 512px; overflow: visible; }
+.bili-flow__lines path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 主链路全程是灰的 */
+.flow-main { stroke: var(--pencil); stroke-width: 1.7; opacity: .22;
+  transition: opacity .25s ease, stroke-width .25s ease; }
+.flow-main.is-lit { opacity: 1; stroke-width: 2.4; }
+/* 3 · 只有改写重来这一支是橙色：灰色是常态，橙色是例外 */
+.flow-retry { stroke: var(--orange); stroke-width: 1.7; opacity: .25;
+  transition: opacity .25s ease, stroke-width .25s ease; }
+.flow-retry.is-lit { opacity: 1; stroke-width: 2.4; }
+
+/* 回环线画出来：路径归一化后用 dashoffset 从 1 收到 0 */
+.flow-loop {
+  stroke: var(--orange);
+  stroke-width: 1.8;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+.flow-loop.is-drawing {
+  opacity: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset .8s ease-out, opacity .2s ease;
+}
+.flow-loop.is-fading { opacity: 0; transition: opacity .4s ease; }
+
+.bili-node {
+  position: absolute;
+  left: 40px;
+  width: 290px;
+  padding: 10px 16px;
+  /* 待命态：描边压得很淡，和点亮态拉开差距。
+     两态用同一个颜色的话，跑到哪一步根本看不出来。 */
+  background: var(--d-bg);
+  border: 1.7px solid rgba(90, 90, 90, .3);
+  border-radius: 15px 6px 14px 6px;
+  transition: border-color .3s ease, background-color .3s ease,
+              box-shadow .3s ease, transform .3s ease;
+}
+.wd--alt .bili-node { background: var(--d-bg-alt); }
+
+/* 当前步的竖色条：整张图里最直接的「我在这儿」 */
+.bili-node::before {
+  content: '';
+  position: absolute;
+  left: -1.7px; top: 11px; bottom: 11px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--pencil);
+  opacity: 0;
+  transform: scaleY(.4);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.bili-node.is-lit::before { opacity: 1; transform: scaleY(1); }
+.bili-node__h { display: flex; align-items: baseline; gap: 8px; }
+.bili-node__en {
+  font-family: var(--font-mono, var(--font-body));
+  font-size: 15px; line-height: 1.55;
+  color: var(--pencil);
+}
+.bili-node__cn {
+  font-family: var(--font-body);
+  font-size: 15.5px; line-height: 1.55;
+  color: var(--pencil);
+}
+.bili-node__d {
+  font-family: var(--font-body);
+  font-size: 14.5px; line-height: 1.72;
+  color: var(--pencil); opacity: .7;
+  margin: 4px 0 0;
+}
+/* 点亮：描边转实、底色提亮、微微抬起来，四个信号一起给 */
+.bili-node.is-lit {
+  border-color: var(--pencil);
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(90, 90, 90, .2);
+  transform: scale(1.025);
+}
+.bili-node.is-lit .bili-node__cn { font-weight: 700; }
+.bili-node.is-lit .bili-node__d  { opacity: .88; }
+
+.bili-node--retry { border-color: rgba(255, 107, 53, .32); }
+.bili-node--retry::before { background: var(--orange); }
+.bili-node--retry .bili-node__en { color: var(--orange); }
+.bili-node--retry.is-lit {
+  border-color: var(--orange);
+  background: #FFF6F1;
+  box-shadow: 0 4px 18px rgba(255, 107, 53, .3);
+}
+
+.bili-end {
+  position: absolute;
+  left: 40px;
+  padding: 6px 13px;
+  background: var(--pencil);
+  border-radius: 14px 5px 13px 5px;
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.55;
+  color: var(--d-bg-alt);
+  opacity: .38;
+  transition: opacity .3s ease, box-shadow .3s ease, transform .3s ease;
+}
+.bili-end.is-lit {
+  opacity: 1;
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(90, 90, 90, .28);
+}
+
+.bili-flow__tag {
+  position: absolute;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 14.5px; line-height: 1.62;
+  color: var(--pencil); opacity: .7;
+}
+.bili-flow__tag--retry { color: var(--orange); opacity: .85; }
+.bili-flow__note {
+  position: absolute;
+  left: 40px; top: 480px;
+  width: 290px;
+  font-family: var(--font-body);
+  font-size: 14.5px; line-height: 1.72;
+  color: var(--orange); opacity: .8;
+}
+
+/* 3 · hover 橙色节点时整条回环加深，主链路压到 40% */
+.bili-flow.focus-retry .flow-main,
+.bili-flow.focus-retry .bili-node:not(.bili-node--retry),
+.bili-flow.focus-retry .bili-end { opacity: .4; }
+.bili-flow.focus-retry .flow-retry { opacity: 1; }
+
+/* —— 5 · 技术栈那行的小反馈 —— */
+.bili-stack { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 40px; }
+.bili-stack__lab {
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.62;
+  color: var(--pencil); opacity: .5;
+  margin-right: 4px;
+}
+.bili-chip {
+  padding: 5px 11px;
+  background: transparent;
+  border: 1.1px solid var(--pencil);
+  border-radius: 11px 4px 10px 4px;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.55;
+  color: var(--pencil);
+  white-space: nowrap;
+  /* 不做位移 —— 一行东西同时抖会很廉价 */
+  transition: background-color .2s ease, color .2s ease;
+}
+.bili-chip:hover { background: var(--pencil); color: var(--d-bg-alt); }
+
+/* —— 6 · 减弱动效：节点全亮、回环完整画出但不再循环 —— */
+@media (prefers-reduced-motion: reduce) {
+  /* 降级：所有节点直接是点亮终态，不再逐个跑 */
+  .bili-node, .bili-end { opacity: 1; transform: none; }
+  .bili-node { border-color: var(--pencil); background: #fff; }
+  .bili-node::before { opacity: 1; transform: none; }
+  .bili-node--retry { border-color: var(--orange); background: #FFF6F1; }
+  .flow-main, .flow-retry { opacity: 1; }
+  .flow-loop { opacity: 1; stroke-dashoffset: 0; transition: none; }
+}
+
+/* —— 6 · 窄屏：流程图移到播放器下方 —— */
+@media (max-width: 1100px) {
+  .bili-body { flex-direction: column; }
+  .bili-side { flex: 1 1 auto; width: 100%; max-width: 460px; }
+  .bili-points { grid-template-columns: 1fr; gap: 18px; }
+}
+
+
+/* ============================================================
+   03 · 教师团队专属小程序（第 1 屏 · 用户痛点与解决思路）
+   规格 1 三段按阅读顺序落位 / 2 两种线都是后画出来的
+        3 ★ 痛点和解法互相点亮 / 4 解法标签歪着落下来
+        5 用户剪影在轻轻呼吸 / 6 窄屏与降级
+   ============================================================ */
+
+.tm1 {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 6px auto 0;
+  aspect-ratio: 1200 / 520;
+}
+.tm1__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.tm1__lines path { fill: none; stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; }
+
+/* 2 · 线永远是后画的：先有内容，再有关系 */
+.tm1-line { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js-anim .wd.is-in .tm1-line {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset .45s ease-out;
+  transition-delay: .55s;
+}
+.tm1-flow { stroke-width: 1.5; stroke-opacity: .3; transition: stroke-opacity .25s ease, stroke-width .25s ease; }
+.js-anim .wd.is-in .tm1-flow { transition: stroke-dashoffset .7s ease-out 1.35s, stroke-opacity .25s ease, stroke-width .25s ease; }
+/* 箭头单独一段，跟在主线时长的 85% 之后 */
+.js-anim .wd.is-in .tm1-arrow { transition: stroke-dashoffset .2s ease-out 1.95s, stroke-opacity .25s ease; }
+
+/* —— 5 · 用户剪影在轻轻呼吸 —— */
+.tm1-person {
+  position: absolute;
+  animation: tmBreathe var(--dur, 6s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes tmBreathe {
+   0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}
+.js-anim .wd:not(.is-in) .tm1-person { opacity: 0; }
+.js-anim .wd.is-in .tm1-person { opacity: 1; transition: opacity .5s cubic-bezier(.2,.7,.3,1); }
+
+/* —— 用户痛点卡 —— */
+.tm1-pains {
+  position: absolute;
+  display: flex;
+  gap: 20px;
+  padding: 20px 22px;
+  background: var(--pencil);
+  border-radius: 4px;
+}
+.tm1-pains__side {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: 44px; padding: 6px 0;
+  background: var(--ink-black, #1A1A1A);
+  border-radius: 3px;
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: #FFFDF5;
+}
+.tm1-pains__list { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.tm1-pain {
+  display: flex; align-items: baseline; gap: 12px;
+  cursor: pointer;
+  transition: opacity .25s ease;
+}
+.tm1-pain__n {
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: #FFFDF5; opacity: .7;
+  flex: 0 0 auto;
+}
+.tm1-pain__t {
+  font-family: var(--font-body);
+  font-size: 17px; font-weight: 700; line-height: 1.68;
+  color: #FFFDF5;
+  white-space: nowrap;
+}
+.tm1-pain__s {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: #FFFDF5; opacity: .72;
+}
+.js-anim .wd:not(.is-in) .tm1-pain { opacity: 0; transform: translateY(14px); }
+.js-anim .wd.is-in .tm1-pain {
+  opacity: 1; transform: none;
+  transition: opacity .5s cubic-bezier(.2,.7,.3,1), transform .5s cubic-bezier(.2,.7,.3,1);
+  transition-delay: calc(.6s + var(--i, 0) * .1s);
+}
+
+/* —— 群体说明 —— */
+.tm1-group { position: absolute; display: flex; flex-direction: column; gap: 4px; }
+.tm1-group__k {
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.68;
+  color: var(--pencil);
+}
+.tm1-group__s {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.6;
+  color: var(--pencil); opacity: .68;
+}
+
+/* —— 解决思路标题 —— */
+.tm1-head { position: absolute; display: flex; align-items: center; gap: 11px; }
+.tm1-head__dot { width: 11px; height: 11px; border-radius: 50%; background: var(--orange); }
+.tm1-head__cn {
+  font-family: var(--font-body);
+  font-size: 22px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+}
+.tm1-head__en {
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil); opacity: .55;
+}
+
+/* —— 4 · 解法标签是歪着落下来的 —— */
+.tm1-fix {
+  position: absolute;
+  width: 361px;
+  display: flex; flex-direction: column; gap: 10px;
+  cursor: pointer;
+  transform: rotate(var(--r, 0deg));
+  transition: transform .25s ease, opacity .25s ease, filter .25s ease;
+}
+.tm1-fix__r { display: flex; align-items: center; gap: 10px; }
+.tm1-fix__pill {
+  padding: 10px 18px;
+  background: var(--tm-c);
+  border-radius: 3px;
+  font-family: var(--font-body);
+  font-size: 17px; font-weight: 700; line-height: 1.68;
+  color: var(--ink-black, #1A1A1A);
+  white-space: nowrap;
+}
+.tm1-fix__map {
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil); opacity: .55;
+  white-space: nowrap;
+}
+.tm1-fix__s {
+  font-family: var(--font-body);
+  font-size: 14.5px; line-height: 1.7;
+  color: var(--pencil); opacity: .8;
+  margin: 0;
+}
+/* 沿曲线画完的先后依次弹进来，收尾带一点回弹 */
+.js-anim .wd:not(.is-in) .tm1-fix { opacity: 0; transform: rotate(var(--r, 0deg)) scale(.92); }
+.js-anim .wd.is-in .tm1-fix {
+  opacity: 1;
+  transform: rotate(var(--r, 0deg)) scale(1);
+  transition: opacity .3s ease, transform .42s cubic-bezier(.34, 1.4, .64, 1);
+  transition-delay: calc(1.9s + var(--i, 0) * .15s);
+}
+.js-anim .wd.is-in .tm1-fix__s { transition-delay: calc(2.02s + var(--i, 0) * .15s); }
+
+/* —— 3 · ★ 痛点和解法互相点亮 ——
+   三条曲线本来就是「哪个痛点通向哪个解法」的答案，hover 只是把它点出来 */
+.tm1.focus-01 [data-pair]:not([data-pair="01"]),
+.tm1.focus-02 [data-pair]:not([data-pair="02"]),
+.tm1.focus-03 [data-pair]:not([data-pair="03"]) { opacity: .35; }
+
+.tm1.focus-01 .tm1-flow[data-pair="01"],
+.tm1.focus-02 .tm1-flow[data-pair="02"],
+.tm1.focus-03 .tm1-flow[data-pair="03"] { stroke-opacity: .75; stroke-width: 2.2; }
+
+.tm1.focus-01 .tm1-fix[data-pair="01"],
+.tm1.focus-02 .tm1-fix[data-pair="02"],
+.tm1.focus-03 .tm1-fix[data-pair="03"] {
+  transform: rotate(var(--r, 0deg)) scale(1.06);
+  filter: drop-shadow(0 0 14px var(--tm-glow));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm1-person { animation: none; }
+  .js-anim .wd.is-in .tm1-fix { transition: opacity .3s ease; transform: rotate(var(--r, 0deg)); }
+  .js-anim .wd.is-in .tm1-line,
+  .js-anim .wd.is-in .tm1-flow,
+  .js-anim .wd.is-in .tm1-arrow { transition: none; stroke-dashoffset: 0; }
+}
+
+/* —— 6 · 窄屏：剪影收掉、曲线换成短竖线、标签回正纵向排 —— */
+@media (max-width: 900px) {
+  .tm1 { aspect-ratio: auto; display: flex; flex-direction: column; gap: 18px; }
+  .tm1__lines, .tm1-person, .tm1-group { display: none; }
+  .tm1-pains, .tm1-head, .tm1-fix { position: static; width: auto; }
+  .tm1-pains { flex-direction: column; }
+  .tm1-pains__side { flex-direction: row; width: auto; justify-content: center; gap: 6px; }
+  .tm1-fix { transform: none; padding-left: 14px; border-left: 2.5px solid var(--tm-c); }
+  .js-anim .wd.is-in .tm1-fix,
+  .js-anim .wd:not(.is-in) .tm1-fix { transform: none; }
+  .tm1.focus-01 .tm1-fix[data-pair="01"],
+  .tm1.focus-02 .tm1-fix[data-pair="02"],
+  .tm1.focus-03 .tm1-fix[data-pair="03"] { transform: none; }
+}
+
+
+/* ============================================================
+   03 · 教师小程序（第 2 屏 · 页面设计与操作流程）
+   规格 1 三台手机按操作顺序到场 / 2 右侧说明跟着手机走
+        3 鼠标指到哪台右边就亮哪组 / 4 点开看大图
+        5 关键词标签的呼吸 / 6 窄屏降级
+   ============================================================ */
+
+/* 左边三台手机 554px 高、右边文字只有 345px，靠 flex-start 对齐右侧下方会空出一大片 */
+.tm2 { display: flex; gap: 60px; align-items: center; margin-top: 6px; }
+.tm2__phones { flex: 0 0 auto; display: flex; gap: 30px; }
+.tm2__side { flex: 1 1 auto; min-width: 0; padding-top: 2px; }
+
+.tm2-phone {
+  margin: 0;
+  cursor: pointer;
+  transition: transform .3s ease-out, opacity .3s ease-out;
+}
+/* 中间那台在版面上本来就比两侧低 44px —— 它是弹层，浮在页面之上，
+   不是并列的第三个页面。入场动画只改相对位移，不动这个基准。 */
+.tm2-phone--low { margin-top: 44px; }
+
+.phone-shell {
+  position: relative;
+  width: 220px;
+  height: 462px;
+  padding: 6px;
+  border-radius: 30px;
+  background: linear-gradient(160deg, #d8d5cd, #a9a49a 45%, #cfcbc2);
+  box-shadow: 0 10px 26px rgba(90, 90, 90, .22);
+  transition: box-shadow .3s ease-out;
+}
+.phone-shell__screen {
+  position: relative;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #F2F2F4;
+}
+.phone-shell__screen img {
+  display: block;
+  width: 100%;
+  /* 长图只露出顶部一屏，其余留给灯箱 */
+  height: auto;
+}
+.phone-shell__island {
+  position: absolute;
+  left: 50%; top: 12px;
+  width: 67px; height: 19px;
+  margin-left: -33.5px;
+  border-radius: 10px;
+  background: #000;
+  z-index: 2;
+}
+.phone-shell__home {
+  position: absolute;
+  left: 50%; bottom: 9px;
+  width: 78px; height: 3px;
+  margin-left: -39px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, .5);
+  z-index: 2;
+}
+
+.tm2-phone figcaption { margin-top: 12px; }
+.tm2-phone__step {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 21px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+}
+.tm2-phone__name {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 16px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil); opacity: .7;
+}
+
+/* 1 · 按用户实际的操作顺序到场，不是三台一起冒出来 */
+.js-anim .wd:not(.is-in) .tm2-phone { opacity: 0; transform: translateY(40px); }
+.js-anim .wd.is-in .tm2-phone {
+  opacity: 1; transform: none;
+  transition: opacity .55s cubic-bezier(.2,.8,.2,1), transform .55s cubic-bezier(.2,.8,.2,1);
+  transition-delay: calc(var(--i, 0) * .16s);
+}
+
+/* —— 右侧说明 —— */
+.tm2__title {
+  font-family: var(--font-body);
+  font-size: 26px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+  margin: 0 0 12px;
+}
+.tm2__desc {
+  font-family: var(--font-body);
+  font-size: 14.5px; line-height: 1.85;
+  color: var(--pencil); opacity: .75;
+  margin: 0 0 26px;
+  max-width: 420px;
+}
+.tm2-group {
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: opacity .3s ease-out;
+}
+.tm2-group:last-child { margin-bottom: 0; }
+.tm2-group__h { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+.tm2-group__n {
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 700; line-height: 1.68;
+  color: var(--orange);
+}
+.tm2-group__t {
+  font-family: var(--font-body);
+  font-size: 17px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil);
+}
+.tm2-group__w {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil); opacity: .6;
+}
+/* 2 · 三组依次滑入，每组对齐它对应的那台手机 */
+.js-anim .wd:not(.is-in) .tm2-group,
+.js-anim .wd:not(.is-in) .tm2__title,
+.js-anim .wd:not(.is-in) .tm2__desc { opacity: 0; transform: translateX(14px); }
+.js-anim .wd.is-in .tm2__title,
+.js-anim .wd.is-in .tm2__desc {
+  opacity: 1; transform: none;
+  transition: opacity .4s ease, transform .4s ease;
+  transition-delay: .62s;
+}
+.js-anim .wd.is-in .tm2__desc { opacity: .75; transition-delay: .68s; }
+.js-anim .wd.is-in .tm2-group {
+  opacity: 1; transform: none;
+  transition: opacity .35s ease, transform .35s ease;
+  transition-delay: calc(.8s + var(--i, 0) * .18s);
+}
+
+/* 5 · 关键词标签：实心与描边交替 */
+.tm2-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tm2-tag {
+  padding: 6px 13px;
+  border: 1.2px solid var(--pencil);
+  border-radius: 3px;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil);
+  white-space: nowrap;
+  /* hover 只改颜色与线宽，不做位移 —— 这里是辅助信息，不该抢手机的注意力 */
+  transition: background-color .2s ease, border-width .2s ease;
+}
+.tm2-tag--solid { background: var(--pencil); color: #FFFDF5; }
+.js-anim .wd:not(.is-in) .tm2-tag { opacity: 0; transform: scale(.92); }
+.js-anim .wd.is-in .tm2-tag {
+  opacity: 1; transform: none;
+  transition: opacity .25s ease, transform .25s ease, background-color .2s ease;
+  transition-delay: calc(.95s + var(--gi, 0) * .18s + var(--i, 0) * .05s);
+}
+
+/* —— 3 · 鼠标指到哪台，右边就亮哪组（双向） —— */
+/* 只压暗手机，右侧文字组保持不变 —— 鼠标在文字区里移动时，
+   三段文字跟着一亮一灰会干扰阅读；对应关系靠手机那边的上浮和
+   高亮已经说清楚了。 */
+.tm2.focus-1 .tm2-phone:not([data-step="1"]),
+.tm2.focus-2 .tm2-phone:not([data-step="2"]),
+.tm2.focus-3 .tm2-phone:not([data-step="3"]) { opacity: .38; }
+
+.tm2.focus-1 .tm2-phone[data-step="1"],
+.tm2.focus-2 .tm2-phone[data-step="2"],
+.tm2.focus-3 .tm2-phone[data-step="3"] { transform: translateY(-8px); }
+.tm2.focus-1 .tm2-phone[data-step="1"] .phone-shell,
+.tm2.focus-2 .tm2-phone[data-step="2"] .phone-shell,
+.tm2.focus-3 .tm2-phone[data-step="3"] .phone-shell { box-shadow: 0 18px 40px rgba(90, 90, 90, .34); }
+
+.tm2.focus-1 .tm2-group[data-step="1"] .tm2-tag--solid,
+.tm2.focus-2 .tm2-group[data-step="2"] .tm2-tag--solid,
+.tm2.focus-3 .tm2-group[data-step="3"] .tm2-tag--solid { background: var(--ink-black, #1A1A1A); }
+.tm2.focus-1 .tm2-group[data-step="1"] .tm2-tag:not(.tm2-tag--solid),
+.tm2.focus-2 .tm2-group[data-step="2"] .tm2-tag:not(.tm2-tag--solid),
+.tm2.focus-3 .tm2-group[data-step="3"] .tm2-tag:not(.tm2-tag--solid) { border-width: 1.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-anim .wd.is-in .tm2-phone,
+  .js-anim .wd.is-in .tm2-group,
+  .js-anim .wd.is-in .tm2-tag { transition: opacity .3s ease; transform: none; }
+  .tm2.focus-1 .tm2-phone[data-step="1"],
+  .tm2.focus-2 .tm2-phone[data-step="2"],
+  .tm2.focus-3 .tm2-phone[data-step="3"] { transform: none; }
+}
+
+/* —— 6 · 窄屏：手机改横向滑动，说明移到下方 —— */
+@media (max-width: 1100px) {
+  .tm2 { flex-direction: column; gap: 30px; }
+  .tm2__phones {
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+  }
+  .tm2-phone { flex: 0 0 auto; scroll-snap-align: center; }
+  .tm2__side { width: 100%; }
+}
+
+
+/* ============================================================
+   lightbox — 规格 4 点开看大图
+   ------------------------------------------------------------
+   缩到 220px 宽之后细节看不清。点开按原始比例显示完整长图，
+   可上下滚动、左右切换。没有这一步，别人只知道你画了三个页面，
+   不知道页面里有什么。
+   ============================================================ */
+
+.lb {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  visibility: hidden;
+}
+.lb.is-open { visibility: visible; }
+
+.lb__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 25, 23, .82);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.lb.is-open .lb__backdrop { opacity: 1; }
+
+.lb__stage {
+  position: relative;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+  opacity: 0;
+  transform: scale(.96);
+  transition: opacity .3s ease, transform .3s var(--ease-out-soft);
+}
+.lb.is-open .lb__stage { opacity: 1; transform: none; }
+.lb__stage img { display: block; width: auto; max-width: 100%; }
+/* 手机长图按固定宽度显示，太宽反而看不全 */
+.lb--phone .lb__stage { width: min(375px, 86vw); }
+.lb--phone .lb__stage img { width: 100%; }
+
+.lb__caption {
+  position: absolute;
+  left: 0; right: 0; bottom: 14px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.72;
+  color: rgba(255, 253, 245, .82);
+  pointer-events: none;
+}
+
+.lb__btn {
+  position: absolute;
+  z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px;
+  padding: 0;
+  border: 1.4px solid rgba(255, 253, 245, .5);
+  border-radius: 16px 6px 15px 6px;
+  background: rgba(28, 25, 23, .6);
+  cursor: pointer;
+  transition: background-color .2s ease, transform .2s ease;
+}
+.lb__btn:hover { background: rgba(28, 25, 23, .9); transform: scale(1.06); }
+.lb__btn svg { width: 18px; height: 18px; fill: none; stroke: #FFFDF5; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lb__btn--close { top: 24px; right: 24px; }
+.lb__btn--prev  { left: 24px;  top: 50%; margin-top: -23px; }
+.lb__btn--next  { right: 24px; top: 50%; margin-top: -23px; }
+
+body.lb-open { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lb__stage { transition: opacity .2s ease; transform: none; }
+  .lb.is-open .lb__stage { transform: none; }
+}
+@media (max-width: 640px) {
+  .lb { padding: 16px 10px; }
+  .lb__btn--prev { left: 8px; }
+  .lb__btn--next { right: 8px; }
+  .lb__btn--close { top: 10px; right: 10px; }
+}
+
+/* 第 2 屏在同一段落里接着第 1 屏，用一个小标题分隔 */
+.tm2__screen-title {
+  font-family: var(--font-body);
+  font-size: 26px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+  margin: 72px 0 8px;
+}
+.tm2__screen-sub {
+  font-family: var(--font-body);
+  font-size: 15.5px; line-height: 1.6;
+  color: var(--pencil); opacity: .7;
+  margin: 0 0 28px;
+}
+
+
+/* ============================================================
+   入场排序用的 transition-delay，落位之后一律清零。
+   留着的话 hover 会被拖慢 —— 比如右侧第三组的入场 delay 是
+   1.16s，鼠标移上去要等一秒多才变色，看着像卡了。
+   只清带 hover 交互的那几类，其余保持原样。
+   ============================================================ */
+.wd.is-settled .vox-shot,
+.wd.is-settled .tm1-pain,
+.wd.is-settled .tm1-fix,
+.wd.is-settled .tm1-fix__s,
+.wd.is-settled .tm2-phone,
+.wd.is-settled .tm2-group,
+.wd.is-settled .tm2-tag,
+.wd.is-settled .bili-point { transition-delay: 0s; }
+
+
+/* ============================================================
+   03 · 教师小程序（第 3 屏 · 后台支撑）
+   规格 1 卡片怎么叠 / 2 每 5 秒换一张 / 3 左边的索引跟着换
+        4 鼠标放上去就停 / 5 点开看原图 / 6 第一次进场
+   ============================================================ */
+
+/* 卡片按 CardSwap 的规则往右上错开，最后一张比 .tm3-stack 右沿多出 56px。
+   给整块留出这 56px，错开的卡片就正好停在内容区边界内，不会被裁掉。 */
+.tm3 { display: flex; gap: 76px; align-items: center; margin-top: 26px; padding-right: 56px; }
+.tm3__left { flex: 1 1 492px; min-width: 0; }
+.tm3__right { flex: 0 0 632px; }
+
+.tm3__title {
+  font-family: var(--font-body);
+  font-size: 28px; font-weight: 700; line-height: 1.5;
+  color: var(--pencil);
+  margin: 0 0 14px;
+}
+.tm3__desc {
+  font-family: var(--font-body);
+  font-size: 15.5px; line-height: 1.85;
+  color: var(--pencil); opacity: .75;
+  margin: 0 0 26px;
+}
+
+/* —— 3 · 左边的索引跟着当前那张卡换 ——
+   卡片缩到 520px 后标题栏的小字很难辨认，访客判断当前是哪个页面
+   主要靠这三行。只变边框不够明显，三样一起变：边框、序号块、整行。 */
+.tm3-index { display: flex; flex-direction: column; gap: 10px; }
+.tm3-idx {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 16px;
+  border: 1.3px solid rgba(90, 90, 90, .3);
+  border-radius: 14px 5px 13px 5px;
+  background: transparent;
+  opacity: .55;
+  cursor: pointer;
+  transition: border-color .35s ease-out, background-color .35s ease-out,
+              opacity .35s ease-out, transform .35s ease-out;
+}
+.tm3-idx__n {
+  display: flex; align-items: center; justify-content: center;
+  width: 29px; height: 29px;
+  flex: 0 0 auto;
+  border: 1.4px solid var(--pencil);
+  border-radius: 9px 3px 8px 3px;
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 700; line-height: 1;
+  color: var(--pencil);
+  transition: background-color .35s ease-out, border-color .35s ease-out, color .35s ease-out;
+}
+.tm3-idx__t {
+  font-family: var(--font-body);
+  font-size: 16.5px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil);
+}
+.tm3-idx__s {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil); opacity: .7;
+}
+.tm3-idx.is-on {
+  border-color: var(--orange);
+  border-width: 1.8px;
+  background: rgba(255, 107, 53, .07);
+  opacity: 1;
+  transform: translateX(4px);
+}
+.tm3-idx.is-on .tm3-idx__n { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+/* —— 1 · 卡片怎么叠 ——
+   每往后一张：右移 56、上抬 46（等于标题栏高度，所以后面两张只露出
+   顶部那一条），再后退 84。三张尺寸完全相同，纵深靠 z 轴和统一斜切，
+   不靠缩小。露多了就变成三张并排，堆叠感会消失。 */
+.tm3-stack {
+  position: relative;
+  width: 632px;
+  height: 453px;
+  perspective: 900px;
+}
+/* 卡片以容器中心为基准（对应 CardSwap 的 xPercent/yPercent: -50），
+   位移量再叠在这个基准上。transform 由 JS 每帧写入。 */
+.tm3-card {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 520px;
+  height: 365px;
+  /* 竖向 flex：截图区吃掉标题栏和边框之后剩下的高度，
+     不再写死 325px —— 写死的话 border-box 里 1.4px 的边框会把底边裁掉 */
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  border: 1.4px solid rgba(90, 90, 90, .35);
+  border-radius: 10px;
+  box-shadow: 0 14px 34px rgba(90, 90, 90, .18);
+  transform-origin: center center;
+  transform: translate(-50%, -50%) skewY(6deg);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .45s ease;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.js-anim .wd.is-in .tm3-card { /* 透明度由 JS 在飞入时逐张打开 */ }
+.tm3-card__bar {
+  display: flex; align-items: center; gap: 8px;
+  flex: 0 0 40px; height: 40px;
+  padding: 0 14px;
+  background: var(--d-bg);
+  border-bottom: 1px solid rgba(90, 90, 90, .18);
+}
+.tm3-card__dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(90, 90, 90, .3); }
+.tm3-card__name {
+  margin-left: 6px;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil); opacity: .72;
+}
+.tm3-card__shot { width: 100%; flex: 1 1 auto; min-height: 0; overflow: hidden; background: #F5F6F8; }
+.tm3-card__shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+
+/* 6 · 第一次进场：从右下角依次飞入 */
+.js-anim .wd:not(.is-in) .tm3-idx { opacity: 0; transform: translateY(12px); }
+.js-anim .wd.is-in .tm3-idx {
+  opacity: .55; transform: none;
+  transition: opacity .45s ease, transform .45s ease;
+  transition-delay: calc(var(--i, 0) * .08s);
+}
+.js-anim .wd.is-in .tm3-idx.is-on { opacity: 1; transform: translateX(4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tm3-card { transition: none !important; }
+}
+
+@media (max-width: 1180px) {
+  .tm3 { flex-direction: column; align-items: flex-start; gap: 34px; }
+  .tm3__right { flex: 0 0 auto; width: 100%; }
+  .tm3-stack { width: 100%; max-width: 632px; height: auto; aspect-ratio: 632 / 453; }
+}
+@media (max-width: 680px) {
+  /* 小屏放不下堆叠，改成只显示当前那张 */
+  .tm3-stack { aspect-ratio: 520 / 365; }
+  .tm3-card { width: 100%; left: 0; top: 0; }
+}
+
+/* 第 3 屏的小节标题 */
+.tm3-head { display: flex; align-items: center; gap: 14px; margin-top: 76px; }
+.tm3-head__n {
+  font-family: var(--font-body);
+  font-size: 17px; font-weight: 700; line-height: 1.68;
+  color: var(--purple);
+}
+.tm3-head__rule { width: 36px; height: 6px; flex: 0 0 auto; }
+.tm3-head__t {
+  font-family: var(--font-body);
+  font-size: 26px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+  margin: 0;
+}
+.tm3-head__s {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.68;
+  color: var(--pencil); opacity: .65;
+}
+
+
+/* ============================================================
+   AI 工作流 · 底座与自进化
+   规格 53 五层架构从左到右画出来 / 54 回路上有一颗光点在跑
+        56 板块底色交替处的过渡
+   ============================================================ */
+
+.fl-base { margin-top: 8px; }
+.fl-base__sub {
+  font-family: var(--font-body);
+  font-size: 14.5px; line-height: 1.6;
+  color: var(--pencil); opacity: .7;
+  margin: 0 0 22px;
+}
+
+/* —— 53 · 五层架构，像用笔勾出来一样从左往右显形 —— */
+.fl-layers { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+.fl-layer {
+  width: 118px;
+  padding: 10px 12px;
+  background: var(--d-bg);
+  border: 1.4px solid rgba(90, 90, 90, .3);
+  /* 框用 clip-path 从右往左揭开，比 opacity 更像「画出来」 */
+  clip-path: inset(0 0 0 0);
+}
+.wd--alt .fl-layer { background: var(--d-bg-alt); }
+.fl-layer:nth-child(4n+1) { border-radius: 15px 6px 14px 6px; }
+.fl-layer:nth-child(4n+3) { border-radius: 6px 15px 6px 14px; }
+.fl-layer__t {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 14.5px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil);
+}
+.fl-layer__d {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.55;
+  color: var(--orange);
+}
+.fl-arrow { width: 32px; height: 10px; flex: 0 0 auto; }
+.fl-arrow path { fill: none; stroke: var(--pencil); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.js-anim .wd:not(.is-in) .fl-layer { clip-path: inset(0 100% 0 0); }
+.js-anim .wd.is-in .fl-layer {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path .35s ease-out;
+  transition-delay: calc(var(--i, 0) * .12s);
+}
+/* 箭头接在它左边那个框画完之后 */
+.js-anim .wd:not(.is-in) .fl-arrow path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js-anim .wd.is-in .fl-arrow path {
+  stroke-dasharray: 1; stroke-dashoffset: 0;
+  transition: stroke-dashoffset .2s ease-out;
+  transition-delay: calc(var(--i, 0) * .12s + .35s);
+}
+
+.fl-base__note {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.7;
+  color: var(--pencil); opacity: .6;
+  margin: 18px 0 0;
+}
+
+/* —— 54 · 自进化闭环 —— */
+.fl-evo {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 44px auto 0;
+  aspect-ratio: 1200 / 452;
+}
+.fl-evo__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.fl-evo__track { fill: none; stroke: var(--pencil); stroke-width: 1.8; opacity: .28; }
+.fl-evo__arrow { fill: var(--pencil); opacity: .45; }
+/* 沿回路跑的那颗光点 */
+.fl-evo__dot { fill: var(--orange); }
+.fl-evo__halo { fill: var(--orange); opacity: .22; }
+
+.fl-evo__node {
+  position: absolute;
+  width: 56px; height: 56px;
+  margin: -28px 0 0 -28px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.6px solid var(--orange);
+  border-radius: 50%;
+  background: var(--d-bg-alt);
+  font-family: var(--font-body);
+  font-size: 17px; font-weight: 700;
+  color: var(--pencil);
+  z-index: 2;
+  transition: background-color .25s ease-out, color .25s ease-out, transform .25s ease-out;
+}
+.wd--alt .fl-evo__node { background: var(--d-bg); }
+/* 光点跑到跟前才亮 —— 由 evo-loop.js 按路径距离判定，
+   不用时间对齐，位置对上了自然就同步 */
+.fl-evo__node.is-lit {
+  background-color: var(--orange);
+  color: #fff;
+  transform: scale(1.12);
+  box-shadow: 0 0 0 5px rgba(255, 107, 53, .16);
+}
+
+.fl-evo__text {
+  position: absolute;
+  width: 290px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.fl-evo__t {
+  font-family: var(--font-body);
+  font-size: 16.5px; font-weight: 700; line-height: 1.62;
+  color: var(--pencil);
+}
+.fl-evo__text--first .fl-evo__t { color: #C9471C; }
+.fl-evo__d {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.7;
+  color: var(--pencil); opacity: .78;
+  margin: 0;
+}
+
+.fl-evo__core {
+  position: absolute;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--d-bg-alt);
+  border: 1.6px solid rgba(90, 90, 90, .25);
+  border-radius: 16px 6px 15px 6px;
+  z-index: 2;
+}
+.wd--alt .fl-evo__core { background: var(--d-bg); }
+.fl-evo__core span {
+  font-family: var(--font-body);
+  font-size: 30px; font-weight: 700; line-height: 1.4;
+  color: var(--pencil);
+}
+
+/* —— 56 · 板块底色交替处不是直角切断，是一条手绘波浪 —— */
+.fl-edge {
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  height: 26px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+.fl-edge--top { top: -1px; }
+.fl-edge--bottom { bottom: -1px; }
+.fl-edge svg { display: block; width: 200%; height: 100%; }
+.fl-edge path { fill: var(--d-bg-alt); }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-anim .wd.is-in .fl-layer { transition: none; clip-path: inset(0 0 0 0); }
+  .js-anim .wd.is-in .fl-arrow path { transition: none; stroke-dashoffset: 0; }
+}
+
+@media (max-width: 980px) {
+  .fl-layers { gap: 10px; }
+  .fl-arrow { display: none; }
+  /* 闭环在窄屏改成纵向列表 */
+  .fl-evo { aspect-ratio: auto; display: flex; flex-direction: column; gap: 16px; }
+  .fl-evo__svg, .fl-evo__core { display: none; }
+  .fl-evo__node { position: static; margin: 0; flex: 0 0 auto; }
+  .fl-evo__text { position: static; width: auto; }
+  .fl-evo__row { display: flex; align-items: flex-start; gap: 14px; }
+}

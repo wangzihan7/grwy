@@ -1,0 +1,21 @@
+# Cloudflare Pages 缓存策略
+# HTML 每次都回源，改完立刻生效；静态资源长缓存，回访几乎不再下载。
+
+/*.html
+  Cache-Control: no-cache
+
+/media/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/proto/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# css/js 你还会改，给一天，配合改名或加版本号更稳
+/css/*
+  Cache-Control: public, max-age=86400
+
+/js/*
+  Cache-Control: public, max-age=86400

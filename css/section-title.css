@@ -1,0 +1,133 @@
+/* ============================================================
+   section-title.css — 全站通用的板块标题
+   ------------------------------------------------------------
+   进场分三拍，呼应首屏「标题一笔一笔写出来」的调子：
+     1. 英文标题逐字上浮，每个字带一点随机的歪，像手写落笔
+     2. 手绘下划线从左往右描出来（和首屏用的是同一套 dashoffset 手法）
+     3. 中文副标题最后淡入
+
+   每处用法在 style 上给出：
+     --st-size     英文字号
+     --st-rule-c   下划线颜色
+     --st-rule-w   下划线宽度
+   ============================================================ */
+
+.sec-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.sec-title__en {
+  font-family: var(--font-body);
+  font-size: var(--st-size, 34px);
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--pencil);
+  margin: 0;
+  white-space: pre-wrap;   /* 拆字后保留词间空格 */
+}
+
+/* 逐字：JS 把文字拆成 span 并写入 --i（序号）和 --r（歪的方向） */
+.sec-title__ch {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+.js-anim .sec-title__ch {
+  opacity: 0;
+  transform: translateY(16px) rotate(calc(var(--r, 1) * -5deg));
+}
+.js-anim .sec-title.is-in .sec-title__ch {
+  opacity: 1;
+  transform: none;
+  transition: opacity .38s ease, transform .5s var(--ease-back);
+  transition-delay: calc(var(--i, 0) * 38ms);
+
+  /* 落位之后接着轻轻浮起来。
+     入场用 transition、浮动用 animation，两者都在改 transform，
+     靠 animation-delay 精确等到这个字入场结束（i×38ms 起步 + 0.5s 时长）
+     再接管；此刻 animation 的 0% 正好是 transform:none，与 transition
+     的终值重合，交接看不出接缝。
+     每个字的周期都不一样，所以永远不会整齐地一起上下，
+     看着像一行字各自在纸上呼吸。 */
+  animation: charFloat calc(3.4s + var(--i, 0) * 137ms) ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 38ms + 520ms);
+}
+
+@keyframes charFloat {
+   0%, 100% { transform: translateY(0)    rotate(0deg); }
+  50%       { transform: translateY(-3px) rotate(calc(var(--r, 1) * .9deg)); }
+}
+
+.sec-title__rule {
+  display: block;
+  width: var(--st-rule-w, 210px);
+  max-width: 90vw;
+  height: 12px;
+  margin-top: -4px;
+  overflow: visible;
+  /* 永久微动第一层：线条自身被噪声推得轻轻蠕动，像墨还没干。
+     和电流边框是同一套手法，只是幅度小一个量级（±1px 左右）。 */
+  filter: url(#ink-wobble);
+  /* 第二层：整条线极缓慢地起伏、伸缩。周期和噪声的 9s 错开，
+     两者永远不同步，看不出循环。 */
+  animation: ruleBreathe 5.5s ease-in-out infinite;
+}
+@keyframes ruleBreathe {
+   0%, 100% { transform: translateY(0)      scaleY(1)    scaleX(1); }
+  33%       { transform: translateY(-1.5px) scaleY(1.14) scaleX(1.008); }
+  66%       { transform: translateY(1px)    scaleY(.9)   scaleX(.997); }
+}
+.sec-title__rule path {
+  fill: none;
+  stroke: var(--st-rule-c, var(--orange));
+  stroke-width: 2.8;
+  stroke-linecap: round;
+}
+/* pathLength=1 把长度归一化，dashoffset 直接用 0~1 */
+.js-anim .sec-title__rule path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.js-anim .sec-title.is-in .sec-title__rule path {
+  stroke-dashoffset: 0;
+  /* 等最后一个字落位之后再起笔 */
+  transition: stroke-dashoffset .62s cubic-bezier(.35, 0, .25, 1);
+  transition-delay: calc(var(--st-n, 8) * 38ms + 120ms);
+}
+
+.sec-title__cn {
+  font-family: var(--font-body);
+  font-size: calc(var(--st-size, 34px) * .5);
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--pencil);
+  opacity: .65;
+  margin: 0;
+}
+.js-anim .sec-title__cn { opacity: 0; transform: translateY(6px); }
+.js-anim .sec-title.is-in .sec-title__cn {
+  opacity: .65;
+  transform: none;
+  transition: opacity .45s ease, transform .45s ease;
+  transition-delay: calc(var(--st-n, 8) * 38ms + 560ms);
+  /* 中文整体浮，幅度比英文更小，周期也更慢 —— 它是配角 */
+  animation: cnFloat 6.2s ease-in-out infinite;
+  animation-delay: calc(var(--st-n, 8) * 38ms + 1010ms);
+}
+@keyframes cnFloat {
+   0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-anim .sec-title__ch,
+  .js-anim .sec-title__cn { opacity: 1; transform: none; }
+  .js-anim .sec-title__cn { opacity: .65; }
+  .js-anim .sec-title__rule path { stroke-dashoffset: 0; }
+  /* 永久微动整体关掉：滤镜、呼吸、逐字浮动都停 */
+  .sec-title__rule { filter: none; animation: none; }
+  .js-anim .sec-title.is-in .sec-title__ch,
+  .js-anim .sec-title.is-in .sec-title__cn { animation: none; }
+}

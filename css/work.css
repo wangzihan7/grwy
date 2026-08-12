@@ -1,0 +1,290 @@
+/* ============================================================
+   work.css — 04 · 作品集 Work
+   规格 27 五件作品围成一个环 / 28 点卡片滚到那一段 / 29 滚到哪件转盘转到哪件
+   ------------------------------------------------------------
+   卡片贴在圆柱面上跟着一起转（rotateY + translateZ），侧面的卡是斜的、
+   压成梯形，背面的会镜像 —— 立体感来自这里。
+
+   注：设计稿的实现说明原本要求「不用 rotateY、卡片永远直立」，
+   看过两种效果的实物对比之后改成了现在这版真 3D。二维模拟那版的
+   算法留在 _compare-carousel.html 里，要换回去可以直接取。
+   ============================================================ */
+
+.work {
+  position: relative;
+  z-index: 1;
+  background: var(--d-bg-alt);
+  padding: calc(var(--nav-h) + 68px) 24px 0;
+  overflow: hidden;
+}
+
+.wk-header { margin-bottom: 30px; }
+
+/* —— 转盘舞台 —— */
+.wk-stage {
+  position: relative;
+  height: 560px;
+  margin: 0 auto;
+  max-width: 1440px;
+  perspective: 1500px;
+  perspective-origin: 50% 46%;
+  touch-action: pan-y;     /* 竖向留给页面，横向手势拿来转环 */
+  cursor: grab;
+  user-select: none;
+}
+.wk-stage.is-dragging { cursor: grabbing; }
+
+/* 轨道整体后退一个半径，正对的那张才落在 Z=0。
+   不补偿的话它离镜头太近，会被透视放大到溢出容器。 */
+.wk-track {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--wk-r, 460px) * -1));
+}
+
+.wk-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 360px;
+  height: 464px;
+  margin: -232px 0 0 -180px;
+  transform-origin: 50% 50%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--d-bg);
+  border: 1.6px solid var(--pencil);
+  box-shadow: 7px 9px 0 rgba(90, 90, 90, .16);
+  /* 手绘感在 3D 里不能丢：圆角照样呼吸 */
+  border-radius: 26px 8px 23px 8px;
+  animation: wkFrame 9s ease-in-out infinite;
+  will-change: transform;
+  pointer-events: none;    /* 转到侧后方的卡不可点，由 JS 放开正面几张 */
+}
+@keyframes wkFrame {
+   0%, 100% { border-radius: 26px  8px 23px  8px; }
+  33%       { border-radius: 21px 12px 28px  6px; }
+  66%       { border-radius: 30px  6px 19px 11px; }
+}
+
+.wk-card.is-hot { pointer-events: auto; cursor: pointer; }
+
+/* 缩略图 */
+.wk-card__thumb {
+  position: relative;
+  height: 262px;
+  flex: 0 0 auto;
+  background: var(--wk-c);
+  overflow: hidden;
+}
+/* 专属色上盖一层米白，只留很淡的色调 */
+.wk-card__thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 253, 245, .8);
+  transition: background-color .3s ease;
+}
+.wk-card.is-hot:hover .wk-card__thumb::after { background: rgba(255, 253, 245, .68); }
+
+/* stroke / fill 写在 svg 上靠继承传给子元素。
+   写成 `.wk-card__art [stroke]` 是选不中的 —— 那些图形元素本来就没有
+   stroke 属性，而 SVG 的 stroke 默认是 none，结果一根线都画不出来。 */
+.wk-card__art {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  stroke: var(--pencil);
+  fill: none;
+}
+
+.wk-card__kind {
+  position: absolute;
+  left: 18px; top: 18px;
+  z-index: 2;
+  padding: 5px 12px;
+  border-radius: 12px 4px 11px 4px;
+  background: var(--wk-c);
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.72;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* 信息区 */
+.wk-card__info {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 17px 20px;
+}
+.wk-card__row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.wk-card__title {
+  font-family: var(--font-body);
+  font-size: 20px; font-weight: 700; line-height: 1.4;
+  color: var(--pencil);
+}
+.wk-card__num {
+  font-family: var(--font-body);
+  font-size: 19px; font-weight: 700; line-height: 1.4;
+  color: var(--wk-c); opacity: .75;
+}
+.wk-card__desc {
+  font-family: var(--font-body);
+  font-size: 14px; line-height: 1.65;
+  color: var(--pencil); opacity: .75;
+  margin: 0;
+}
+.wk-card__tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.wk-card__tag {
+  padding: 3px 9px;
+  border: .9px solid var(--pencil);
+  border-radius: 7px 3px 6px 3px;
+  opacity: .6;
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.72;
+  color: var(--pencil);
+  white-space: nowrap;
+}
+.wk-card__cta {
+  margin-top: auto;
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--font-body);
+  font-size: 15.5px; font-weight: 500; line-height: 1.72;
+  color: var(--wk-c);
+}
+.wk-card__cta svg { width: 11px; height: 9px; fill: none; stroke: var(--wk-c); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s ease; }
+.wk-card.is-hot:hover .wk-card__cta svg { transform: translateX(4px); }
+
+/* —— 拖动提示 —— */
+.wk-hint {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  margin-top: 6px;
+}
+.wk-hint svg { fill: none; stroke: var(--pencil); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.wk-hint__arrow { width: 26px; height: 14px; opacity: .45; }
+.wk-hint__hand  { width: 30px; height: 32px; fill: var(--d-bg-alt); }
+.wk-hint span {
+  font-family: var(--font-body);
+  font-size: 15.5px; line-height: 1.68;
+  color: var(--pencil); opacity: .6;
+}
+
+/* 点击说明：光靠 cursor 变手型，多数人不会想到卡片能点 */
+.wk-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 9px 0 0;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.72;
+  color: var(--pencil);
+  opacity: .45;
+}
+.wk-tip svg {
+  width: 15px; height: 15px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: var(--pencil);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* —— 分页圆点 —— */
+.wk-dots { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; padding-bottom: 54px; }
+.wk-dot {
+  width: 11px; height: 11px;
+  padding: 0; border: 0;
+  border-radius: 6px 3px 6px 3px;
+  background: var(--dot-c);
+  opacity: .3;
+  cursor: pointer;
+  transition: width .35s var(--ease-out-soft), opacity .35s ease;
+}
+.wk-dot.is-on { width: 30px; opacity: 1; }
+
+/* —— 28 · 作品详情就在转盘下方，不是弹窗 —— */
+.wk-section {
+  position: relative;
+  z-index: 1;
+  /* 顶部 sticky 导航会压住标题，留出偏移量 */
+  scroll-margin-top: 96px;
+  min-height: 70vh;
+  padding: 70px 24px;
+}
+.wk-section__inner { max-width: 1200px; margin: 0 auto; }
+.wk-section__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 14px; }
+.wk-section__num {
+  font-family: var(--font-marker);
+  font-size: 36px; line-height: 1.2;
+  color: var(--wk-c);
+}
+.wk-section__title {
+  font-family: var(--font-body);
+  font-size: 32px; font-weight: 700; line-height: 1.4;
+  color: var(--pencil);
+  margin: 0;
+}
+.wk-section__desc {
+  font-family: var(--font-body);
+  font-size: 16px; line-height: 1.8;
+  color: var(--pencil); opacity: .75;
+  max-width: 760px;
+  margin: 0 0 20px;
+}
+.wk-section__todo {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 9px 16px;
+  border: 1.4px dashed rgba(90, 90, 90, .3);
+  border-radius: 16px 6px 14px 6px;
+  font-family: var(--font-body);
+  font-size: 14.5px; line-height: 1.72;
+  color: var(--pencil); opacity: .5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wk-card { animation: none; }
+}
+
+/* —— 窄屏降级成横向滑动的 2D 轮播，小屏做 3D 会发糊 —— */
+@media (max-width: 900px) {
+  .wk-stage {
+    height: auto;
+    perspective: none;
+    cursor: default;
+  }
+  .wk-track {
+    position: relative;
+    inset: auto;
+    transform: none;
+    transform-style: flat;
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 4px 4px 18px;
+  }
+  .wk-card {
+    position: relative;
+    left: auto; top: auto; margin: 0;
+    flex: 0 0 min(300px, 78vw);
+    height: auto;
+    transform: none !important;
+    opacity: 1 !important;
+    scroll-snap-align: center;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .wk-card__thumb { height: 190px; }
+  .wk-card__title { font-size: 19px; }
+  .wk-hint { display: none; }
+  .wk-tip { margin-top: 2px; }
+}

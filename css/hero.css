@@ -1,0 +1,277 @@
+/* ============================================================
+   hero.css — 01 · 首页 Hero
+   规格 04 标题书写 / 05 配色节奏 / 06 荧光笔 / 07 涂鸦呼吸
+        08 按钮会躲一下 / 11 往下看看
+   ============================================================ */
+
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--nav-h) 24px 0;
+  overflow: hidden;
+}
+
+/* —— 07 · 涂鸦在呼吸 ——
+   各自缓慢浮动并轻微旋转，周期各不相同，delay 用负值错开，
+   所以永远不会整齐划一。
+   幅度与节奏比设计稿标注放大了一档：原来 6~10s 一轮、上下 15px，
+   在满屏尺度下几乎看不出在动。 */
+.hero__doodles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero__doodles .doodle { position: absolute; }
+
+.doodle--float { animation: floatDoodle var(--dur, 5.5s) ease-in-out var(--delay, 0s) infinite; }
+
+@keyframes floatDoodle {
+   0%   { transform: translate(0, 0)        rotate(0deg); }
+  28%   { transform: translate(5px, -22px)  rotate(6deg); }
+  55%   { transform: translate(-4px, -9px)  rotate(-3deg); }
+  78%   { transform: translate(3px, 13px)   rotate(-6deg); }
+ 100%   { transform: translate(0, 0)        rotate(0deg); }
+}
+
+/* —— 内容区 —— */
+.hero__center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 1440px;
+  /* 设计稿里内容中心比屏幕中心略高，补一点下内边距还原重心 */
+  padding-bottom: 68px;
+}
+
+/* 小人：先落位，再转入常驻的轻微起伏。
+   animation 的 transform 会接管 transition 的，delay 设成入场时长，
+   两段刚好衔接上。 */
+.hero__mascot {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .6s ease, transform .6s var(--ease-out-soft);
+}
+.hero.is-in .hero__mascot {
+  opacity: 1;
+  transform: none;
+  animation: mascotIdle 4.5s ease-in-out .6s infinite;
+}
+
+@keyframes mascotIdle {
+   0%, 100% { transform: translateY(0)    rotate(0deg); }
+  50%       { transform: translateY(-9px) rotate(-1.5deg); }
+}
+
+/* 手上的铅笔比身体晃得快一点，像正在画 */
+.mascot__pencil {
+  transform-box: fill-box;
+  transform-origin: 0% 86%;   /* 笔尖 */
+  animation: pencilWave 2.2s ease-in-out infinite;
+}
+@keyframes pencilWave {
+   0%, 100% { transform: rotate(0deg); }
+  30%       { transform: rotate(-12deg); }
+  65%       { transform: rotate(6deg); }
+}
+
+/* —— 04 · 标题一个字母一个字母写出来 ——
+   每个字母 = 一条 SVG path，多笔画的字母用 M 抬笔分段。
+   fill 透明 + 圆头描边 = 细马克笔手写感。
+   dasharray/dashoffset 由 JS 按 getTotalLength() 设置后依次播放。 */
+.hero__title {
+  display: block;
+  width: min(880px, 76vw);
+  height: auto;
+  overflow: visible;
+}
+.hero__title path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 全部写完后整行轻轻跳一下 */
+.hero__title.is-bounce { animation: titleBounce .3s var(--ease-back); }
+@keyframes titleBounce {
+   0%  { transform: translateY(0)     scale(1); }
+  45%  { transform: translateY(-10px) scale(1.02); }
+ 100%  { transform: translateY(0)     scale(1); }
+}
+
+/* —— 副标题 + 06 · 荧光笔划过 —— */
+.hero__subtitle {
+  position: relative;
+  width: min(740px, 84vw);
+  margin: 0;
+  text-align: center;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.45;
+}
+
+/* 黄色高亮在标题写完后从左往右刷出，两端不齐、略微倾斜。
+   位置用 em 表达（设计稿 20px 字号下 top 18px / height 16px），
+   这样字号随视口缩放时高亮始终压在同一位置。 */
+.hero__highlighter {
+  position: absolute;
+  left: 8.9%;
+  top: .9em;
+  width: 0;
+  height: .8em;
+  border-radius: 3px;
+  background: var(--yellow);
+  opacity: .42;
+  transform: skewX(-5deg);
+  transition: width .6s ease-out;
+}
+.hero__title.is-written ~ .hero__subtitle .hero__highlighter,
+.hero.is-highlighted .hero__highlighter { width: 82.4%; }
+
+.hero__subtitle-text {
+  position: relative;
+  display: block;
+  font-family: var(--font-body);
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.45;
+  color: var(--d-ink);
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+.hero.is-in .hero__subtitle-text { opacity: 1; }
+
+/* —— CTA —— */
+.hero__cta {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-top: 18px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .5s ease, transform .5s var(--ease-out-soft);
+}
+.hero.is-cta-in .hero__cta { opacity: 1; transform: none; }
+
+/* —— 08 · 按钮会躲一下 —— */
+.btn-hand {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 58px;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 2.2px solid var(--pencil);
+  box-shadow: 4px 5px 0 var(--pencil);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .3s var(--ease-out-soft), box-shadow .3s ease;
+}
+.btn-hand--l { border-radius: 30px  9px 26px  9px; animation: frameBreatheL 8s ease-in-out infinite; }
+.btn-hand--r { border-radius:  9px 28px  9px 30px; animation: frameBreatheR 8s ease-in-out infinite; }
+
+/* 颜色从底部渗上来填满 */
+.btn-hand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--btn-fill, var(--orange));
+  opacity: .85;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform .3s ease;
+}
+
+.btn-hand__label {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-body);
+  font-size: 21px;
+  line-height: 1.45;
+  color: var(--pencil);
+  white-space: nowrap;
+  transition: color .3s ease;
+}
+
+.btn-hand:hover,
+.btn-hand:focus-visible {
+  transform: rotate(-2deg) scale(1.05);
+  box-shadow: 6px 7px 0 var(--pencil);
+}
+.btn-hand:hover::before,
+.btn-hand:focus-visible::before { transform: scaleY(1); }
+.btn-hand:hover .btn-hand__label,
+.btn-hand:focus-visible .btn-hand__label { color: #fff; }
+
+/* 松开鼠标弹回时的抖一下 */
+.btn-hand.is-wiggle { animation: wiggle .4s ease-in-out; }
+@keyframes wiggle {
+   0%, 100% { transform: rotate(0)      scale(1); }
+  25%       { transform: rotate(1.5deg) scale(1.01); }
+  60%       { transform: rotate(-1deg)  scale(1); }
+}
+
+/* —— 11 · 往下看看 —— */
+.hero__scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 74px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity .4s ease;
+}
+.hero__scroll-hint span {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.68;
+  color: var(--pencil);
+  opacity: .65;
+}
+.hero__scroll-hint svg { opacity: .6; }
+.hero__scroll-hint.is-faded { opacity: 0; pointer-events: none; }
+
+.hero__scroll-hint-inner { animation: hintBob 2s ease-in-out infinite; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+@keyframes hintBob {
+   0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(8px); }
+}
+
+/* —— 底部波浪 —— */
+.hero__wave {
+  position: absolute;
+  left: 4.86%;
+  bottom: 20px;
+  width: 90.3%;
+  height: 26px;
+  pointer-events: none;
+}
+.hero__wave path { fill: none; stroke: var(--pencil); stroke-width: 2; opacity: .32; }
+
+.wave-dot {
+  position: absolute;
+  bottom: 29px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  opacity: .9;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .hero__doodles { display: none; }
+  .hero__center { padding-bottom: 40px; }
+  .hero__cta { flex-direction: column; gap: 16px; }
+}

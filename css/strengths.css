@@ -1,0 +1,321 @@
+/* ============================================================
+   strengths.css — 03 · 核心能力 Strengths
+   规格 20 一叠卡斜着摊向右后方 / 21 直接拖着翻牌 / 22 越往后越暗越糊
+        23 翻牌是有重量的 / 24-26 点击展开的详情弹层
+   ============================================================ */
+
+.strengths {
+  position: relative;
+  z-index: 1;
+  background: var(--d-bg);
+  padding: calc(var(--nav-h) + 70px) 24px 60px;
+  overflow: hidden;
+}
+
+/* 板块标题本身由 section-title.css 统一处理 */
+.sc-header { margin-bottom: 46px; }
+
+/* —— 20 · 一叠卡斜着摊向右后方 ——
+   四张卡不是并排放，而是一叠斜着摊出去：最上面那张正对你，
+   后面每张再往后 220px、向右偏 90px、侧转 22°，只露出右边缘一条。
+   perspective 决定这个"摊开"有多强的透视，1400px 是设计稿给的值。 */
+.sc-stage {
+  position: relative;
+  height: 460px;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
+  touch-action: pan-y;      /* 允许竖向滚页，横向手势留给翻牌 */
+  cursor: grab;
+  user-select: none;
+}
+.sc-stage.is-dragging { cursor: grabbing; }
+
+.sc-track {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 440px;
+  height: 440px;
+  margin: -220px 0 0 -220px;
+  transform-style: preserve-3d;
+}
+
+.sc-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  background: var(--d-bg-alt);
+  border: 2.2px solid var(--pencil);
+  border-radius: 28px 8px 25px 8px;
+  box-shadow: 6px 8px 0 rgba(90, 90, 90, .18);
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  will-change: transform, filter, opacity;
+}
+
+/* 22 · 越往后越暗越糊：上面还叠一层近黑色的半透明罩，
+   四张下来最后一张已经暗到只剩个轮廓 */
+.sc-card__tint {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #05060A;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 只有最上面那张能点开，后面的点不动，避免误触（规格 25） */
+.sc-card { pointer-events: none; }
+.sc-card.is-front { pointer-events: auto; cursor: pointer; }
+
+/* —— 卡片内容 —— */
+.sc-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: 60px;
+}
+.sc-card__ico {
+  display: flex; align-items: center; justify-content: center;
+  width: 60px; height: 60px;
+  border: 2.2px solid var(--sc-c);
+  border-radius: 22px 8px 20px 8px;
+}
+.sc-card__ico svg { width: 44px; height: 44px; fill: none; stroke: var(--sc-c); stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+.sc-card__num {
+  font-family: var(--font-body);
+  font-size: 34px; font-weight: 700; line-height: 1.1;
+  color: var(--sc-c); opacity: .5;
+}
+
+.sc-card__titles { margin-top: 26px; display: flex; flex-direction: column; gap: 4px; }
+.sc-card__en {
+  font-family: var(--font-body);
+  font-size: 17px; font-weight: 700; line-height: 1.72;
+  color: var(--sc-c);
+}
+.sc-card__cn {
+  font-family: var(--font-body);
+  font-size: 29px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil);
+}
+
+.sc-card__rule { display: block; width: 100%; height: 8px; margin: 18px 0 14px; overflow: visible; }
+.sc-card__rule path { fill: none; stroke: var(--pencil); stroke-width: 1.6; opacity: .3; }
+
+.sc-card__desc {
+  font-family: var(--font-body);
+  font-size: 15px; line-height: 1.75;
+  color: var(--pencil); opacity: .72;
+  margin: 0;
+}
+
+.sc-card__points { margin-top: 18px; display: flex; flex-direction: column; gap: 11px; }
+.sc-card__point { display: flex; align-items: center; gap: 9px; }
+.sc-card__point svg { width: 13px; height: 11px; flex: 0 0 auto; fill: none; stroke: var(--sc-c); stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.sc-card__point span {
+  font-family: var(--font-body);
+  font-size: 16px; line-height: 1.68;
+  color: var(--pencil); opacity: .85;
+}
+
+.sc-card__footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sc-card__idx {
+  font-family: var(--font-body);
+  font-size: 14px; font-weight: 700; line-height: 1.68;
+  color: var(--pencil); opacity: .4;
+}
+.sc-card__more {
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--font-body);
+  font-size: 16px; font-weight: 500; line-height: 1.68;
+  color: var(--sc-c);
+}
+.sc-card__more svg { width: 11px; height: 11px; fill: none; stroke: var(--sc-c); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s ease; }
+.sc-card.is-front:hover .sc-card__more svg { transform: translateX(3px); }
+
+/* —— 左右箭头 —— */
+.sc-arrow {
+  position: absolute;
+  top: 50%;
+  margin-top: -24px;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--d-bg-alt);
+  border: 2px solid var(--pencil);
+  cursor: pointer;
+  z-index: 10;
+  transition: transform .25s ease;
+}
+.sc-arrow--prev { left: 60px;  border-radius: 17px 6px 17px 6px; }
+.sc-arrow--next { right: 60px; border-radius: 6px 17px 6px 17px; }
+.sc-arrow:hover { transform: scale(1.08); }
+.sc-arrow svg { width: 20px; height: 14px; fill: none; stroke: var(--pencil); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* —— 拖动提示 —— */
+.sc-hint {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  margin-top: 20px;
+}
+.sc-hint svg { fill: none; stroke: var(--pencil); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sc-hint__arrow { width: 26px; height: 14px; opacity: .45; }
+.sc-hint__hand  { width: 30px; height: 32px; fill: var(--d-bg-alt); }
+.sc-hint span {
+  font-family: var(--font-body);
+  font-size: 15.5px; line-height: 1.68;
+  color: var(--pencil); opacity: .6;
+}
+
+/* —— 分页圆点 —— */
+.sc-dots { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 20px; }
+.sc-dot {
+  width: 11px; height: 11px;
+  padding: 0; border: 0;
+  border-radius: 6px 3px 6px 3px;
+  background: var(--dot-c);
+  opacity: .3;
+  cursor: pointer;
+  transition: width .35s var(--ease-out-soft), opacity .35s ease;
+}
+.sc-dot.is-on { width: 30px; opacity: 1; }
+
+/* —— 涂鸦 —— */
+.sc-doodles { position: absolute; inset: 0; pointer-events: none; }
+.sc-doodles .doodle { position: absolute; }
+
+
+/* ============================================================
+   24-26 · 点击展开的详情弹层
+   ============================================================ */
+
+.sc-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  visibility: hidden;
+}
+.sc-modal.is-open { visibility: visible; }
+
+/* 背景页整体高斯模糊 8px 并压暗 24% */
+.sc-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(90, 90, 90, .24);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+.sc-modal.is-open .sc-modal__backdrop { opacity: 1; }
+
+.sc-modal__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1000px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;              /* 滚动交给内部的 __scroll，关闭按钮才不会被滚走 */
+  background: var(--d-bg-alt);
+  border: 2.2px solid var(--pencil);
+  border-radius: 28px 8px 25px 8px;
+  box-shadow: 8px 10px 0 rgba(90, 90, 90, .2);
+  transform-origin: 50% 50%;
+}
+
+.sc-modal__scroll {
+  overflow-y: auto;
+  padding: 44px;
+  overscroll-behavior: contain;  /* 滚到底不带着页面一起滚 */
+}
+
+.sc-modal__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding-right: 56px; }
+.sc-modal__head-l { display: flex; align-items: center; gap: 18px; }
+.sc-modal__ico {
+  display: flex; align-items: center; justify-content: center;
+  width: 64px; height: 64px;
+  flex: 0 0 auto;
+  border: 2.2px solid var(--sc-c);
+  border-radius: 23px 8px 21px 8px;
+}
+.sc-modal__ico svg { width: 48px; height: 48px; fill: none; stroke: var(--sc-c); stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+.sc-modal__titles { display: flex; flex-direction: column; gap: 4px; }
+.sc-modal__en {
+  font-family: var(--font-body);
+  font-size: 18px; font-weight: 700; line-height: 1.45;
+  color: var(--sc-c);
+}
+.sc-modal__cn {
+  font-family: var(--font-body);
+  font-size: 34px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil); margin: 0;
+}
+
+/* 关闭按钮固定在面板右上角，跟着面板滚动一起走 */
+.sc-modal__close {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  flex: 0 0 auto;
+  padding: 0;
+  background: var(--d-bg-alt);
+  border: 2px solid var(--pencil);
+  border-radius: 16px 6px 15px 6px;
+  cursor: pointer;
+  transition: transform .25s ease, background-color .25s ease;
+}
+.sc-modal__close:hover { transform: rotate(90deg); background: var(--d-bg); }
+.sc-modal__close svg { width: 18px; height: 18px; fill: none; stroke: var(--pencil); stroke-width: 2.2; stroke-linecap: round; }
+
+.sc-modal__divider { display: block; width: 100%; height: 8px; margin: 22px 0; overflow: visible; }
+.sc-modal__divider path { fill: none; stroke: var(--pencil); stroke-width: 1.6; opacity: .3; }
+
+.sc-group { margin-bottom: 22px; }
+.sc-group:last-child { margin-bottom: 0; }
+.sc-group__head { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+.sc-group__dot { width: 13px; height: 13px; border-radius: 5px 2px 5px 2px; background: var(--g-c); flex: 0 0 auto; }
+.sc-group__title {
+  font-family: var(--font-body);
+  font-size: 22px; font-weight: 700; line-height: 1.45;
+  color: var(--pencil); margin: 0;
+}
+.sc-group__li { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 11px; }
+.sc-group__li:last-child { margin-bottom: 0; }
+.sc-group__li svg { width: 9px; height: 16px; margin-top: 4px; flex: 0 0 auto; fill: none; stroke: var(--g-c); stroke-width: 2; stroke-linecap: round; }
+.sc-group__li span {
+  font-family: var(--font-body);
+  font-size: 15.5px; line-height: 1.75;
+  color: var(--pencil); opacity: .85;
+}
+
+body.modal-open { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-card { transition: none !important; }
+  .sc-arrow:hover, .sc-modal__close:hover { transform: none; }
+}
+
+@media (max-width: 1100px) {
+  .sc-arrow { display: none; }
+}
+@media (max-width: 560px) {
+  .sc-modal__scroll { padding: 24px; }
+  .sc-stage { height: 400px; }
+  .sc-track { width: 320px; height: 380px; margin: -190px 0 0 -160px; }
+  .sc-card { padding: 22px; }
+  .sc-card__cn { font-size: 24px; }
+  .sc-modal__cn { font-size: 26px; }
+}
