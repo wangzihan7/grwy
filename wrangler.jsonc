@@ -1,0 +1,9 @@
+{
+  // 纯静态站：只上传静态资源，没有服务端代码，所以不写 main 字段。
+  // 站点文件都在仓库根目录，directory 就是 "./"。
+  "name": "grwy",
+  "compatibility_date": "2026-08-12",
+  "assets": {
+    "directory": "./"
+  }
+}
