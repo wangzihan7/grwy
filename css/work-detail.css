@@ -150,6 +150,8 @@
   background: rgba(0, 0, 0, .6);
   font-family: var(--font-body);
   font-size: 14px; line-height: 1.55;
+  /* 倒计时每秒都在变，等宽数字才不会让角标左右抖 */
+  font-variant-numeric: tabular-nums;
   color: #fff;
   pointer-events: none;
 }
