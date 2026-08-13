@@ -238,8 +238,22 @@
   font-size: 14px; line-height: 1.62;
   color: var(--pencil);
   white-space: nowrap;
+  /* 不做位移 —— 一排东西同时抖会很廉价，只换底色和字色 */
+  transition: background-color .2s ease, color .2s ease, opacity .2s ease;
 }
 .wd--alt .wd-flow__chip { background: var(--d-bg-alt); }
+
+/* hover：整块填成铅笔灰配浅字，与技术栈那行同一套反馈。
+   入场动画给 chip 挂了错峰 delay，这里必须清零，
+   否则鼠标放上去要等半秒才变色。 */
+.wd-flow__chip:hover,
+.js-anim .wd.is-in .wd-flow__chip:hover,
+.wd--alt .wd-flow__chip:hover {
+  background: var(--pencil);
+  color: var(--d-bg-alt);
+  opacity: 1;
+  transition-delay: 0s;
+}
 .wd-flow__arrow { width: 13px; height: 9px; fill: none; stroke: var(--pencil); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: .32; }
 
 /* 只动 border-color 与 opacity，不动尺寸，避免整行东西跟着抖 */
@@ -248,7 +262,8 @@
 .js-anim .wd.is-in .wd-flow__chip {
   opacity: .75;
   border-color: var(--pencil);
-  transition: opacity .3s ease, border-color .3s ease;
+  transition: opacity .3s ease, border-color .3s ease,
+              background-color .2s ease, color .2s ease;
   transition-delay: calc(.5s + var(--i, 0) * .12s);
 }
 .js-anim .wd.is-in .wd-flow__arrow {
@@ -328,6 +343,15 @@
   font-size: 26px; font-weight: 700; line-height: 1.45;
   color: var(--pencil);
   margin: 0;
+}
+
+/* 每条线开头的一句话总述，比正文略大、比标题轻 */
+.fl-sec__intro {
+  font-family: var(--font-body);
+  font-size: 16px; line-height: 1.78;
+  color: var(--pencil); opacity: .8;
+  max-width: 760px;
+  margin: -10px 0 26px;
 }
 
 .fl-lab {
@@ -523,9 +547,10 @@
         4 三段实现顺序进场 / 5 技术栈的小反馈 / 6 窄屏与减弱动效
    ============================================================ */
 
-.bili-body { display: flex; gap: 24px; align-items: flex-start; }
+.bili-body { display: flex; gap: 60px; align-items: flex-start; }
 .bili-main { flex: 1 1 820px; min-width: 0; }
-.bili-side { flex: 0 0 460px; }
+/* padding 再推开一点，让流程图不贴着播放器 */
+.bili-side { flex: 0 0 460px; padding-left: 16px; }
 
 /* —— 三段实现 —— */
 .bili-points { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 34px; }
@@ -670,8 +695,10 @@
   position: absolute;
   white-space: nowrap;
   font-family: var(--font-body);
-  font-size: 14.5px; line-height: 1.62;
+  /* 行高压紧：两个节点之间只有 24px 缝隙，按 1.62 排会顶到下一个节点 */
+  font-size: 14.5px; line-height: 1.25;
   color: var(--pencil); opacity: .7;
+  z-index: 3;
 }
 .bili-flow__tag--retry { color: var(--orange); opacity: .85; }
 .bili-flow__note {
@@ -1474,13 +1501,6 @@ body.lb-open { overflow: hidden; }
   stroke-dasharray: 1; stroke-dashoffset: 0;
   transition: stroke-dashoffset .2s ease-out;
   transition-delay: calc(var(--i, 0) * .12s + .35s);
-}
-
-.fl-base__note {
-  font-family: var(--font-body);
-  font-size: 15px; line-height: 1.7;
-  color: var(--pencil); opacity: .6;
-  margin: 18px 0 0;
 }
 
 /* —— 54 · 自进化闭环 —— */
