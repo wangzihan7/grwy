@@ -1,5 +1,5 @@
 /* ============================================================
-   contact.js — 规格 41 点一下就复制走了 / 42 手机号点开才显示
+   contact.js — 规格 41 点一下就复制走了
                 43 简历按钮 hover 抖一下 / 47 进场只播一次
    ============================================================ */
 
@@ -26,7 +26,7 @@
   /* —— 41 · 邮箱点一下就复制走了 —— */
   const mail = contact.querySelector('[data-copy]');
   if (mail) {
-    const act = mail.querySelector('.ct-card__act');
+    const act = mail.querySelector('.ct-strip__act');
     const text = mail.dataset.copy;
     let back = 0;
 
@@ -56,40 +56,6 @@
           ta.remove();
         } catch (e) { done(false); }
       }
-    });
-  }
-
-  /* —— 42 · 手机号点开才显示 ——
-     真实号码不写进 HTML，点击时才由 JS 拼出来，
-     爬虫抓页面源码抓不到完整号码，真人想看随时能看。
-
-     ↓↓↓ 把中间四位换成你的真实号码 ↓↓↓ */
-  const PHONE_MID = '8067';
-  /* ↑↑↑ 只改这四位就行，前后两段在 HTML 里 ↑↑↑ */
-
-  const phone = contact.querySelector('[data-phone]');
-  if (phone) {
-    const val = phone.querySelector('.ct-card__v');
-    const act = phone.querySelector('.ct-card__act');
-    let shown = false;
-
-    phone.addEventListener('click', function () {
-      if (shown) return;
-      shown = true;
-      act.textContent = '已显示';
-
-      const head = phone.dataset.head || '';
-      const tail = phone.dataset.tail || '';
-      val.innerHTML = head + ' ' +
-        PHONE_MID.split('').map(function (d) {
-          return '<span class="ct-digit">' + d + '</span>';
-        }).join('') + ' ' + tail;
-
-      if (reduce) return;
-      /* 逐位翻出来，像老式翻页牌 */
-      Array.prototype.forEach.call(val.querySelectorAll('.ct-digit'), function (el, i) {
-        setTimeout(function () { el.classList.add('is-flip'); }, i * 60);
-      });
     });
   }
 

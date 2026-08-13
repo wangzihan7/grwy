@@ -20,7 +20,27 @@
     const btn   = wrap.querySelector('.vox-player__btn');
     const icon  = btn && btn.querySelector('path');
     const fsBtn = wrap.querySelector('.vox-player__fs');
+    const durEl = wrap.querySelector('.vox-player__dur');
     if (!video) return;
+
+    /* —— 角标上的时间：没播时是总长，播起来变成剩余时间往下走 ——
+       秒数向上取整：currentTime 为 0 时显示完整时长，
+       最后一秒显示 00:01 而不是提前归零。
+       时长从视频元数据读，HTML 里那个值只是元数据到位前的占位，
+       换视频不用再手改。 */
+    function fmt(sec) {
+      if (!isFinite(sec) || sec < 0) sec = 0;
+      const s = Math.ceil(sec);
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return (m < 10 ? '0' + m : m) + ':' + (r < 10 ? '0' + r : r);
+    }
+    function showTotal()  { if (durEl && isFinite(video.duration)) durEl.textContent = fmt(video.duration); }
+    function showRemain() { if (durEl && isFinite(video.duration)) durEl.textContent = fmt(video.duration - video.currentTime); }
+
+    video.addEventListener('loadedmetadata', showTotal);
+    video.addEventListener('timeupdate', showRemain);
+    if (video.readyState >= 1) showTotal();   // 元数据已就绪就直接刷一次
 
     function setIcon(playing) {
       if (icon) icon.setAttribute('d', playing ? ICON_PAUSE : ICON_PLAY);
@@ -91,6 +111,7 @@
       setIcon(false);
       video.currentTime = 0;
       video.load();
+      showTotal();          // 画面回到封面，时间也回到总长
     });
 
     setIcon(false);
