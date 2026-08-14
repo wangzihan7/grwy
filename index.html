@@ -40,7 +40,17 @@ document.documentElement.classList.add('js-anim');
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
 
+  /* 人只要自己滑过一次，后面就不许再抢他的位置。
+     window.load 要等所有资源（含十几 MB 的视频）都下载完才触发，
+     那时人早滑到半路了，这时候再置顶就不是「进站即首屏」，
+     而是把人硬拽回去。开屏遮罩期间 body 锁着滚动，
+     所以揭幕时那次置顶不受这个开关影响。 */
+  var userScrolled = false;
+  window.addEventListener('scroll', function () { userScrolled = true; },
+                          { passive: true, once: true });
+
   function jumpTop() {
+    if (userScrolled) return;
     var h = document.documentElement, keep = h.style.scrollBehavior;
     h.style.scrollBehavior = 'auto';     // 绕开 smooth，瞬间到位
     window.scrollTo(0, 0);
