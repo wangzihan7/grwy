@@ -1,9 +1,17 @@
 # Cloudflare Pages 缓存策略
-# HTML 每次都回源，改完立刻生效；静态资源长缓存，回访几乎不再下载。
+#
+# 规则很简单，只有一条要记：
+#   换图片 / 视频时，起一个新文件名，别覆盖旧的。
+#   （它们是 immutable 长缓存，覆盖同名文件，老访客一年都看不到新的）
+#
+# css / js 不用管，no-cache 会让浏览器每次先问一句「变了吗」，
+# 没变返回 304（几百字节），变了自动取新的 —— 改完推上去所有人立刻是最新。
 
 /*.html
   Cache-Control: no-cache
 
+# 大文件、几乎不改，回访一个字节都不用重下。
+# 代价：换内容必须换文件名。
 /media/*
   Cache-Control: public, max-age=31536000, immutable
 
@@ -13,9 +21,9 @@
 /proto/*
   Cache-Control: public, max-age=31536000, immutable
 
-# css/js 你还会改，给一天，配合改名或加版本号更稳
+# 会持续改，交给 304 协商，省掉手动维护版本号的心智负担
 /css/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: no-cache
 
 /js/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: no-cache
