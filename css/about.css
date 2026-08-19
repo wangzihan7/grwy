@@ -1,6 +1,6 @@
 /* ============================================================
    about.css — 02 · 关于我 About
-   规格 14 两组卡片先后落位 / 18 头像框在轻轻变形 / 19 涂鸦在飘，标签会亮
+   规格 14 两组卡片先后落位 / 19 涂鸦在飘，标签会亮
    ============================================================ */
 
 .about {
@@ -30,25 +30,26 @@
 
 .about__avatar-wrap { position: relative; flex: 0 0 auto; padding: 8px 11px 15px 4px; }
 
-/* 18 · 头像框在轻轻变形：圆角在四组不对称数值间 8s 循环。
-   和卡片边框的噪声抖动是两种手法，周期也错开，同屏不打架。 */
+/* 头像框：直角长方形，比例跟着照片走。 */
 .about__avatar {
   position: relative;
   width: 164px;
-  height: 164px;
+  height: 230px;
   background: var(--d-bg);
   border: 1.75px solid var(--pencil);
-  border-radius: 54px 8px 49px 8px;
-  animation: frameWobble 8s ease-in-out infinite;
   overflow: hidden;
 }
-@keyframes frameWobble {
-   0%, 100% { border-radius: 54px  8px 49px  8px; }
-  25%       { border-radius: 44px 14px 58px  6px; }
-  50%       { border-radius: 60px  6px 42px 13px; }
-  75%       { border-radius: 48px 11px 54px  9px; }
-}
 .about__avatar svg { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); }
+/* 照片铺满整框，跟着上面那圈会变形的圆角一起被裁 —— 换张照片只用换文件，不用动样式。
+   框是 164x230（1:1.4），和竖构图原图同比例，所以整张照片正好铺满、不裁切。
+   换一张别的比例的照片时，用 object-position 调取景：数值越小越往上。 */
+.about__avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
 
 .about__avatar-deco { position: absolute; }
 .about__avatar-deco--star  { right: 0; top: 0; }
@@ -250,7 +251,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .js-anim .reveal { opacity: 1; transform: none; }
-  .about__avatar { animation: none; }
 }
 
 @media (max-width: 1000px) {
